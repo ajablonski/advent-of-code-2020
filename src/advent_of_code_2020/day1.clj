@@ -3,36 +3,32 @@
             [clojure.string :as str]
             [clojure.set]))
 
+(def day-1-input (io/resource "day1/input1.txt"))
+
 (defn parse-lines
   [s]
   (map #(Integer/parseInt %) (str/split s #"\n")))
 
-(defn get-pair
-  [n & {:keys [sum] :or {sum 2020}}]
-  (- sum n))
-
-(defn get-pair-summing-to
-  [s sum]
-  (filter (fn [n] (contains? s (get-pair n :sum sum))) s))
+(defn find-pair-summing-to
+  [nums sum]
+  (let [s (set nums)]
+    (set (filter (fn [n] (contains? s (- sum n))) nums))))
 
 (defn main-1
   []
-  (let [nums (set (parse-lines
-                    (slurp (io/resource "day1/input1.txt"))))
-        paired (get-pair-summing-to nums 2020)]
+  (let [nums (parse-lines (slurp day-1-input))
+        paired (find-pair-summing-to nums 2020)]
     (println (apply * paired))))
 
 (defn main-2
   []
-  (let [nums (set (parse-lines
-                    (slurp (io/resource "day1/input1.txt"))))
-        remainders (map (fn [n] (list n (clojure.set/difference nums #{n}))) nums)
-        trios (map
-                (fn [n-and-set]
-                  (let
-                    [[n s] n-and-set]
-                    (cons n (get-pair-summing-to s (- 2020 n)))))
-                remainders)
-        sets (set (mapcat (fn [trio] (if (= 3 (count trio)) trio nil)) trios))
-        ]
-    (println (apply * sets))))
+  (let [nums (set (parse-lines (slurp day-1-input)))
+        trios (mapcat
+                (fn [n]
+                  (let [pair
+                        (find-pair-summing-to
+                          (clojure.set/difference nums #{n})
+                          (- 2020 n))]
+                    (if (empty? pair) nil (cons n pair))))
+                nums)]
+    (println (apply * (set trios)))))
