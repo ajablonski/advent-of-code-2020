@@ -11,5 +11,3 @@
   (testing "Integration test part 2"
     (is (= "\n"
            (with-out-str (main-2))))))
-
-(run-all-tests)

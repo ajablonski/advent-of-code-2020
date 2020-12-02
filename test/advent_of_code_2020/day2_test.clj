@@ -46,5 +46,3 @@
            (RuleAndPassword. (Rule. 6 7 \z) "dqzzzjbzz")
            (RuleAndPassword. (Rule. 1 5 \a) "sososos")
            ]))))
-
-(run-all-tests)
