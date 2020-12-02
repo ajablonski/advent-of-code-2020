@@ -9,4 +9,6 @@
              :day1-2 {:main advent-of-code-2020.day1/main-2}
              :day2-1 {:main advent-of-code-2020.day2/main-1}
              :day2-2 {:main advent-of-code-2020.day2/main-2}
+             :day3-1 {:main advent-of-code-2020.day3/main-1}
+             :day3-2 {:main advent-of-code-2020.day3/main-2}
              })
