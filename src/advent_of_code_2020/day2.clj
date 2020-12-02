@@ -28,9 +28,8 @@
 
 (defn parse-line
   [line]
-  (let [[rule-part pw] (str/split line #": ")
-        [range-part character] (str/split rule-part #" ")
-        [num-1 num-2] (str/split range-part #"-")]
+  (let [[_ num-1 num-2 character pw]
+        (re-find #"(\d+)-(\d+) ([a-z]): ([a-z]+)" line)]
     (RuleAndPassword.
       (Rule.
         (Integer/parseInt num-1)
