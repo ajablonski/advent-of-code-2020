@@ -15,23 +15,23 @@
 
 (deftest pw-rule-test
   (testing "Fails when password has too few of letter"
-    (is (false? (.pw-matches? (Rule. 1 2 \a) "bbb"))))
+    (is (false? (pw-matches-count-rule? (Rule. 1 2 \a) "bbb"))))
   (testing "Fails when password has too many of letter"
-    (is (false? (.pw-matches? (Rule. 1 2 \a) "aaa"))))
+    (is (false? (pw-matches-count-rule? (Rule. 1 2 \a) "aaa"))))
   (testing "True when password has just allowed number of letter"
-    (is (true? (.pw-matches? (Rule. 1 3 \a) "a")))
-    (is (true? (.pw-matches? (Rule. 1 3 \a) "aa")))
-    (is (true? (.pw-matches? (Rule. 1 3 \a) "aaa")))
-    (is (true? (.pw-matches? (Rule. 1 3 \a) "babab")))))
+    (is (true? (pw-matches-count-rule? (Rule. 1 3 \a) "a")))
+    (is (true? (pw-matches-count-rule? (Rule. 1 3 \a) "aa")))
+    (is (true? (pw-matches-count-rule? (Rule. 1 3 \a) "aaa")))
+    (is (true? (pw-matches-count-rule? (Rule. 1 3 \a) "babab")))))
 
 (deftest pw-rule-2-test
   (testing "Fails when password does not contain letter at either index"
-    (is (false? (.pw-matches-rule-2? (Rule. 1 2 \a) "bb"))))
+    (is (false? (pw-matches-index-rule? (Rule. 1 2 \a) "bb"))))
   (testing "Fails when password contains letter at both indices"
-    (is (false? (.pw-matches-rule-2? (Rule. 1 4 \a) "aaaa"))))
+    (is (false? (pw-matches-index-rule? (Rule. 1 4 \a) "aaaa"))))
   (testing "True when password has letter at just one index"
-    (is (true? (.pw-matches-rule-2? (Rule. 1 3 \a) "abb")))
-    (is (true? (.pw-matches-rule-2? (Rule. 1 3 \a) "bba")))))
+    (is (true? (pw-matches-index-rule? (Rule. 1 3 \a) "abb")))
+    (is (true? (pw-matches-index-rule? (Rule. 1 3 \a) "bba")))))
 
 (deftest parse-line-test
   (testing "Can parse a line"
