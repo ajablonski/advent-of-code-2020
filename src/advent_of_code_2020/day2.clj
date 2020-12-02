@@ -8,7 +8,7 @@
   (pw-matches-count-rule? [this pw])
   (pw-matches-index-rule? [this pw]))
 
-(defrecord Rule [num-1 num-2 letter]
+(defrecord Rule [^Integer num-1 ^Integer num-2 ^Character letter]
   PasswordMatcher
   (pw-matches-count-rule? [_ pw]
     (let [letter-count (count (filter #(= % letter) pw))
@@ -19,8 +19,8 @@
   (pw-matches-index-rule? [_ pw]
     (let [index-1 (- num-1 1)
           index-2 (- num-2 1)
-          letter-1 (.charAt pw index-1)
-          letter-2 (.charAt pw index-2)]
+          letter-1 (.charAt ^String pw index-1)
+          letter-2 (.charAt ^String pw index-2)]
       (and (or (= letter-1 letter) (= letter-2 letter))
            (not (and (= letter-1 letter) (= letter-2 letter)))))))
 
@@ -34,7 +34,7 @@
       (Rule.
         (Integer/parseInt num-1)
         (Integer/parseInt num-2)
-        (.charAt character 0))
+        (.charAt ^String character 0))
       pw)))
 
 (defn parse-lines
