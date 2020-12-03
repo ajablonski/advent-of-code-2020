@@ -40,9 +40,6 @@
 
 (deftest parse-lines-test
   (testing "Can parse multiple lines"
-    (is (=
-          (parse-lines "6-7 z: dqzzzjbzz\n1-5 a: sososos")
-          [
-           (RuleAndPassword. (Rule. 6 7 \z) "dqzzzjbzz")
-           (RuleAndPassword. (Rule. 1 5 \a) "sososos")
-           ]))))
+    (is (= (parse-lines "6-7 z: dqzzzjbzz\n1-5 a: sososos")
+           [(RuleAndPassword. (Rule. 6 7 \z) "dqzzzjbzz")
+            (RuleAndPassword. (Rule. 1 5 \a) "sososos")]))))
