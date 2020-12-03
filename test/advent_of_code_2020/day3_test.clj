@@ -1,7 +1,6 @@
 (ns advent-of-code-2020.day3_test
   (:require [clojure.test :refer :all]
-            [advent-of-code-2020.day3 :refer :all])
-  (:import (advent_of_code_2020.day3 Position)))
+            [advent-of-code-2020.day3 :refer :all]))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
@@ -14,17 +13,18 @@
            (with-out-str (main-2))))))
 
 (deftest get-col-test
-  (testing "Move next position"
-    (is (= (get-col 0 10 3)
+  (testing "Get column associated with row after filtering out skipped rows"
+    (is (= (get-col :row-num 0 :grid-width 10 :step-size 3)
            0))
-    (is (= (get-col 3 10 3)
+    (is (= (get-col :row-num 3 :grid-width 10 :step-size 3)
            9))
-    (is (= (get-col 4 10 3)
+    (is (= (get-col :row-num 4 :grid-width 10 :step-size 3)
            2))))
 
 (deftest get-tree-count-test
   (testing "Tree not present"
-    (is (= (get-tree-count 2 2 [".##" "..." "..."])
-           0))
-    (is (= (get-tree-count 0 2 [".##" "..." "..."])
+    (is (= (get-tree-count 2 "##.")
+           0)))
+  (testing "Tree present"
+    (is (= (get-tree-count 0 "#..")
            1))))
