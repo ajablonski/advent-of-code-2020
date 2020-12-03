@@ -28,3 +28,29 @@
   (testing "Tree present"
     (is (= (get-tree-count 0 "#..")
            1))))
+
+(deftest get-trees-in-path-test
+  (testing "Get count of trees in 1-1 path"
+    (is (= (get-trees-in-path 1 1 [
+                                   "#.."
+                                   ".#."
+                                   "..#"])
+           3)))
+  (testing "Get trees when col-step is greater than 1"
+    (is (= (get-trees-in-path 2 1 [
+                                   "#...."
+                                   "..#.."
+                                   "....#"])
+           3)))
+  (testing "Get trees when row-step is greater than 1"
+    (is (= (get-trees-in-path 1 2 [
+                                   "#...."
+                                   "#####"
+                                   ".#..."])
+           2)))
+  (testing "Get trees when wraps around"
+    (is (= (get-trees-in-path 2 1 [
+                                   "#.."
+                                   "..#"
+                                   ".#."])
+           3))))

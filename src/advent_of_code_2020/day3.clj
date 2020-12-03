@@ -12,30 +12,31 @@
   [col row-string]
   (if (= (.charAt ^String row-string col) \#) 1 0))
 
-(defn get-total-tree-count
+(defn get-trees-in-path
   [col-step row-step grid]
   (let [adjusted-grid (vec (keep-indexed #(if (= (mod %1 row-step) 0) %2) grid))]
     (reduce-kv
       (fn [total row-num row]
-        (+ total
-           (get-tree-count
-             (get-col :row-num row-num :grid-width (count (get grid 0)) :step-size col-step)
-             row)))
+        (+
+          total
+          (let [col-num (get-col :row-num row-num :grid-width (count (get grid 0)) :step-size col-step)]
+            (get-tree-count col-num row))))
       0
       adjusted-grid)))
 
 (defn main-1
   []
   (println
-    (get-total-tree-count 3 1 (str/split-lines (slurp day-3-input)))))
+    (get-trees-in-path 3 1 (str/split-lines (slurp day-3-input)))))
 
 (defn main-2
   []
-  (let [grid (str/split-lines (slurp day-3-input))]
+  (let [col-and-row-steps ['(1 1) '(3 1) '(5 1) '(7 1) '(1 2)]]
     (println
-      (*
-        (get-total-tree-count 1 1 grid)
-        (get-total-tree-count 3 1 grid)
-        (get-total-tree-count 5 1 grid)
-        (get-total-tree-count 7 1 grid)
-        (get-total-tree-count 1 2 grid)))))
+      (reduce
+        (fn [product [col-step row-step]]
+          (*
+            product
+            (get-trees-in-path col-step row-step (str/split-lines (slurp day-3-input)))))
+        1
+        col-and-row-steps))))
