@@ -1,29 +1,31 @@
 (ns advent-of-code-2020.day4
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.set :as set]))
 
 (def day-4-input (io/resource "day4/input1.txt"))
 
 (defn to-document
   [s]
-  (apply merge
-         (map #(hash-map (keyword (get % 0)) (get % 1))
-              (map #(str/split % #":")
-                   (str/split s #"\s")))))
+  (let [entries (str/split s #"\s")
+        k-v-pairs (map #(str/split % #":") entries)]
+    (reduce
+      (fn [result [k v]] (assoc result (keyword k) v))
+      {}
+      k-v-pairs)))
 
-(let [required-keys [:byr :iyr :eyr :hgt :hcl :ecl :pid]]
+(let [required-keys #{:byr :iyr :eyr :hgt :hcl :ecl :pid}]
   (defn valid-document?
     [doc]
-    (reduce
-      (fn [valid key] (and valid (contains? doc key)))
-      true
-      required-keys)))
+    (set/subset? required-keys (set (keys doc)))))
 
 (defn valid-height?
   [height]
   (or
-    (and (str/ends-with? height "cm") (<= 150 (Integer/parseInt (str/replace height "cm" "")) 193))
-    (and (str/ends-with? height "in") (<= 59 (Integer/parseInt (str/replace height "in" "")) 76))))
+    (and (str/ends-with? height "cm")
+         (<= 150 (Integer/parseInt (str/replace height "cm" "")) 193))
+    (and (str/ends-with? height "in")
+         (<= 59 (Integer/parseInt (str/replace height "in" "")) 76))))
 
 (defn valid-haircolor? [hair-color]
   (some? (re-matches #"#[0-9a-z]{6}" hair-color)))
@@ -46,16 +48,24 @@
        (valid-pid? (doc :pid))
        (valid-eyecolor? (doc :ecl))))
 
+(defn parse-docs
+  [all-docs-string]
+  (map to-document (str/split all-docs-string #"\n\n")))
+
+(defn count-valid-docs
+  [docs validator]
+  (count (filter validator docs)))
+
 (defn main-1
   []
-  (let [doc-strings (str/split (slurp day-4-input) #"\n\n")
-        docs (map to-document doc-strings)]
-    (println
-      (count (filter valid-document? docs)))))
+  (println
+    (count-valid-docs
+      (parse-docs (slurp day-4-input))
+      valid-document?)))
 
 (defn main-2
   []
-  (let [doc-strings (str/split (slurp day-4-input) #"\n\n")
-        docs (map to-document doc-strings)]
-    (println
-      (count (filter extra-valid-document? docs)))))
+  (println
+    (count-valid-docs
+      (parse-docs (slurp day-4-input))
+      extra-valid-document?)))
