@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def day-2-input (io/resource "day2/input1.txt"))
+(def day-2-input (io/resource "day2.txt"))
 
 (defprotocol PasswordMatcher
   (pw-matches-count-rule? [this pw])

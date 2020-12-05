@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def day-3-input (io/resource "day3/input1.txt"))
+(def day-3-input (io/resource "day3.txt"))
 
 (defn get-col
   [& {:keys [row-num grid-width step-size]}]

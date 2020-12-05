@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [clojure.set :as set]))
 
-(def day-4-input (io/resource "day4/input1.txt"))
+(def day-4-input (io/resource "day4.txt"))
 
 (defn to-document
   [s]

@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def day-7-input (io/resource "day7/input1.txt"))
+(def day-7-input (io/resource "day7.txt"))
 
 (defn main-1
   []
