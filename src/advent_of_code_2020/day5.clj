@@ -5,11 +5,14 @@
 
 (def day-5-input (io/resource "day5.txt"))
 
-(let [digit-map (hash-map \B 1, \R 1, \F 0, \L 0)]
+(let [ones (set '(\B \R))]
   (defn get-seat-id
     [seat-string]
     (reduce
-      (fn [id-so-far char] (+ (* id-so-far 2) (get digit-map char)))
+      (fn [id-so-far char]
+        (+
+          (* id-so-far 2)
+          (if (contains? ones char) 1 0)))
       0
       seat-string)))
 
