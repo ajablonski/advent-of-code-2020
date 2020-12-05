@@ -5,13 +5,13 @@
 
 (def day-5-input (io/resource "day5.txt"))
 
-(defn get-seat-id
-  [seat-string]
-  (Integer/parseInt
-    (str/replace
-      (str/replace seat-string #"[BR]" "1")
-      #"[FL]" "0")
-    2))
+(let [digit-map (hash-map \B 1, \R 1, \F 0, \L 0)]
+  (defn get-seat-id
+    [seat-string]
+    (reduce
+      (fn [id-so-far char] (+ (* id-so-far 2) (get digit-map char)))
+      0
+      seat-string)))
 
 (defn main-1
   []
