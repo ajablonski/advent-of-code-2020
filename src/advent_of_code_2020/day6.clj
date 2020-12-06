@@ -3,20 +3,34 @@
             [clojure.string :as str]
             [clojure.set :as set]))
 
-(def day-6-input (io/resource "day6.txt"))
+(def day-6-input (slurp (io/resource "day6.txt")))
+
+(defn parse-answers-string
+  [group-string]
+  (map set (str/split-lines group-string)))
+
+(defn parse-groups-string
+  [groups-string]
+  (map parse-answers-string (str/split groups-string #"\n\n")))
+
+(defn count-yes-answers-with-joiner-fn
+  [joiner]
+  (fn [groups]
+    (reduce
+      #(+ %1 (count (reduce joiner %2)))
+      0
+      groups)))
+
+(defn- do-main
+  [joiner]
+  (println
+    ((count-yes-answers-with-joiner-fn joiner)
+     (parse-groups-string day-6-input))))
 
 (defn main-1
   []
-  (let [input (slurp day-6-input)
-        groups (str/split input #"\n\n")
-        groups-no-gaps (map #(count (set (str/replace % #"[^a-z]" ""))) groups)]
-    (println
-      (reduce + groups-no-gaps))))
+  (do-main set/union))
 
 (defn main-2
   []
-  (let [input (slurp day-6-input)
-        groups (str/split input #"\n\n")
-        groups-as-sets (map #(count (reduce set/intersection (map set (str/split-lines %)))) groups)]
-    (println
-      (reduce + groups-as-sets))))
+  (do-main set/intersection))
