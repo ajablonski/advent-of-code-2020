@@ -1,6 +1,6 @@
 (ns advent-of-code-2020.day9_test
   (:require [clojure.test :refer :all]
-            [advent-of-code-2020.day6 :refer :all]))
+            [advent-of-code-2020.day9 :refer :all]))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
