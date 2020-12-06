@@ -1,10 +1,10 @@
 # advent-of-code-2020
 
-A Clojure library designed to ... well, that part is up to you.
+Exercises from Advent of Code 2020
 
 ## Usage
 
-FIXME
+Run using Leiningen (`lein`). A separate profile exists for each problem on each day, so that day `1`, problem `2` is run with `lein with-profile day1-2 run`.
 
 ## License
 
