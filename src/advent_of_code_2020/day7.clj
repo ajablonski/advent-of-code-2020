@@ -6,22 +6,20 @@
 (def day-7-input (io/resource "day7.txt"))
 
 (defn parse-rule [rule]
-  (let [[bag-type contained-strings] (str/split rule #" bags contain ")
-        initial-rule {bag-type []}]
-    (if (= contained-strings "no other bags.")
-      initial-rule
-      (reduce
-        (fn [result contained-string]
-          (let [[_ quantity contained-color]
-                (re-find #"([0-9]+) (.*) bag" contained-string)]
-            (update result bag-type
-                    #(conj
-                       %
-                       {:color    contained-color
-                        :quantity (Integer/parseInt quantity)})
-                    )))
-        initial-rule
-        (str/split contained-strings #", ")))))
+  (let [[bag-type contained-strings] (str/split rule #" bags contain ")]
+    {bag-type
+     (if (= contained-strings "no other bags.")
+       []
+       (reduce
+         (fn [result contained-string]
+           (let [[_ quantity contained-color]
+                 (re-find #"([0-9]+) (.*) bag" contained-string)]
+             (conj
+               result
+               {:color    contained-color
+                :quantity (Integer/parseInt quantity)})))
+         []
+         (str/split contained-strings #", ")))}))
 
 (defn parse-rules [rules-string]
   (reduce merge (map parse-rule (str/split-lines rules-string))))
@@ -31,7 +29,7 @@
   (let [direct-containers
         (keep
           (fn [[k v]] (if (some #(= (:color %) color) v) k))
-            rules-map)]
+          rules-map)]
     (set/union (set direct-containers)
                (reduce
                  #(set/union
@@ -52,8 +50,7 @@
         (get-bags-contained
           rules-map color :multiplier (* multiplier quantity))))
     {}
-    (get rules-map bag-type))
-  )
+    (get rules-map bag-type)))
 
 (defn main-1
   []
