@@ -29,9 +29,9 @@
 (defn get-can-contain
   [rules-map color]
   (let [direct-containers
-        (map
-          key
-          (filter (fn [[_ v]] (some #(= (:color %) color) v)) rules-map))]
+        (keep
+          (fn [[k v]] (if (some #(= (:color %) color) v) k))
+            rules-map)]
     (set/union (set direct-containers)
                (reduce
                  #(set/union
