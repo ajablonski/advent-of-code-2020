@@ -1,7 +1,8 @@
 (ns advent-of-code-2020.day7
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [advent-of-code-2020.utils :refer :all]))
 
 (def day-7-input (io/resource "day7.txt"))
 
@@ -24,7 +25,8 @@
 (defn parse-rules [rules-string]
   (reduce merge (map parse-rule (str/split-lines rules-string))))
 
-(defn get-can-contain
+(defn get-bags-containing
+  "Gets bags that can contain a certain bag color, directly or indirectly"
   [rules-map color]
   (let [direct-containers
         (keep
@@ -34,10 +36,11 @@
                (reduce
                  #(set/union
                     %1
-                    (get-can-contain rules-map %2)) #{} direct-containers))))
+                    (get-bags-containing rules-map %2)) #{} direct-containers))))
 
-(defn get-bags-contained
-  [rules-map bag-type & {:keys [multiplier] :or {multiplier 1}}]
+(defn get-bags-contained-by
+  "Gets bags that a certain bag color contains, directly or indirectly"
+  [rules-map bag-type]
   (reduce
     (fn [bag-map {color :color quantity :quantity}]
       (merge-with
@@ -45,10 +48,9 @@
         (update bag-map color
                 (fn [old-value]
                   (if (nil? old-value)
-                    (* quantity multiplier)
-                    (+ old-value (* quantity multiplier)))))
-        (get-bags-contained
-          rules-map color :multiplier (* multiplier quantity))))
+                    quantity
+                    (+ old-value quantity))))
+        (map-vals #(* % quantity) (get-bags-contained-by rules-map color))))
     {}
     (get rules-map bag-type)))
 
@@ -56,13 +58,12 @@
   []
   (let [rules-map (parse-rules (slurp day-7-input))]
     (println
-      (count (get-can-contain rules-map "shiny gold")))))
+      (count (get-bags-containing rules-map "shiny gold")))))
 
 (defn main-2
   []
   (let [rules-map (parse-rules (slurp day-7-input))]
     (println
       (reduce
-        (fn [sum [_ v]] (+ sum v))
-        0
-        (get-bags-contained rules-map "shiny gold")))))
+        +
+        (vals (get-bags-contained-by rules-map "shiny gold"))))))

@@ -30,28 +30,28 @@ dark olive bags contain 3 faded blue bags, 4 dotted black bags.
 vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
 faded blue bags contain no other bags.
 dotted black bags contain no other bags.")]
-  (deftest get-can-contain-test
+  (deftest get-bags-containing-test
     (testing "Shows colors that can contain this color at 1 level"
-      (is (= (get-can-contain
+      (is (= (get-bags-containing
                test-rules
                "shiny gold")
              #{"bright white" "muted yellow" "dark orange" "light red"}))))
-  (deftest get-bags-contained-test
+  (deftest get-bags-contained-by-test
     (testing "Shows empty for bottom level bag"
-      (is (= (get-bags-contained test-rules "dotted black")
+      (is (= (get-bags-contained-by test-rules "dotted black")
              {})))
     (testing "Shows first level pass for bag with level-1 rule"
-      (is (= (get-bags-contained test-rules "dark olive")
+      (is (= (get-bags-contained-by test-rules "dark olive")
              {"faded blue"   3
               "dotted black" 4})))
     (testing "Shows bags that need to be nested"
-      (is (= (get-bags-contained test-rules "shiny gold")
+      (is (= (get-bags-contained-by test-rules "shiny gold")
              {"dark olive"   1
               "vibrant plum" 2
               "faded blue"   13
               "dotted black" 16})))
     (testing "Shows combined multipliers"
-      (is (= (get-bags-contained test-rules "muted yellow")
+      (is (= (get-bags-contained-by test-rules "muted yellow")
              {"shiny gold"   2,
               "dark olive"   2,
               "faded blue"   35,
