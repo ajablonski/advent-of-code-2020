@@ -1,13 +1,21 @@
-(ns advent-of-code-2020.day8_test
+(ns advent-of-code-2020.day8-test
   (:require [clojure.test :refer :all]
             [advent-of-code-2020.day8 :refer :all]))
 
+(deftest replace-instr-test
+  (testing "Replace instruction correctly"
+    (is (= "nop +5"
+           (replace-instr "jmp +5")))
+    (is (= "jmp +5"
+           (replace-instr "nop +5")))))
+
+
 (deftest integration-test-main-1
   (testing "Integration test part 1"
-    (is (= "\n"
+    (is (= "5\n"
            (with-out-str (main-1))))))
 
 (deftest integration-test-main-2
   (testing "Integration test part 2"
-    (is (= "\n"
+    (is (= "8\n"
            (with-out-str (main-2))))))
