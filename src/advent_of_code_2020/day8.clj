@@ -5,16 +5,16 @@
 (def day-8-input (str/split-lines (slurp (io/resource "day8.txt"))))
 
 (defn acc
-  [[accumulator index visited-indexes] argument]
-  (list (+ accumulator argument) (+ index 1) (conj visited-indexes index)))
+  [[accumulator index] argument]
+  (list (+ accumulator argument) (+ index 1)))
 
 (defn nop
-  [[accumulator index visited-indexes] argument]
-  (list accumulator (+ index 1) (conj visited-indexes index)))
+  [[accumulator index] _]
+  (list accumulator (+ index 1)))
 
 (defn jump
-  [[accumulator index visited-indexes] argument]
-  (list accumulator (+ index argument) (conj visited-indexes index)))
+  [[accumulator index] argument]
+  (list accumulator (+ index argument)))
 
 (defn parse-instruction
   [instruction-string]
@@ -28,8 +28,9 @@
 (defn build-program
   [instruction-list]
   (fn [accumulator idx visited-idxs]
-    (let [[new-acc new-idx new-visited-idxs]
-          ((get instruction-list idx) (list accumulator idx visited-idxs))]
+    (let [[new-acc new-idx]
+          ((get instruction-list idx) (list accumulator idx))
+          new-visited-idxs (conj visited-idxs idx)]
       (cond (contains? new-visited-idxs new-idx) (list new-acc :fail)
             (>= new-idx (count instruction-list)) (list new-acc :success)
             :else (recur new-acc new-idx new-visited-idxs)))))
