@@ -38,16 +38,23 @@
                     %1
                     (get-bags-containing rules-map %2)) #{} direct-containers))))
 
+(declare get-bags-contained-by)
+
+(defn- add-other-bag's-bags-fn
+  "Returns a function that merges in another bag's map of bags to quantities with an existing map of bags to quantities"
+  [rules-map]
+  (fn [bag-map {color :color quantity :quantity}]
+    (merge-with
+      +
+      bag-map
+      {color quantity}
+      (map-vals #(* % quantity) (get-bags-contained-by rules-map color)))))
+
 (defn get-bags-contained-by
   "Gets bags that a certain bag color contains, directly or indirectly"
   [rules-map bag-type]
   (reduce
-    (fn [bag-map {color :color quantity :quantity}]
-      (merge-with
-        +
-        bag-map
-        {color quantity}
-        (map-vals #(* % quantity) (get-bags-contained-by rules-map color))))
+    (add-other-bag's-bags-fn rules-map)
     {}
     (get rules-map bag-type)))
 
