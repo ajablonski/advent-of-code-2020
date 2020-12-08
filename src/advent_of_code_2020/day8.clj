@@ -17,13 +17,16 @@
   (list accumulator (+ index argument)))
 
 (defn parse-instruction
-  [instruction-string]
+  [instr-string]
   (let [[_ inst sign number]
-        (re-find #"([a-z]{3}) ([+-])([0-9]+)" instruction-string)
+        (re-find #"([a-z]{3}) ([+-])([0-9]+)" instr-string)
         argument ((if (= sign "-") - +) (Integer/parseInt number))
         inst-fn (cond (= inst "acc") acc (= inst "jmp") jump :else nop)]
     (fn [state] (inst-fn state argument))))
 
+(defn parse-program
+  [instr-strings]
+  (vec (map parse-instruction instr-strings)))
 
 (defn build-program
   [instruction-list]
@@ -35,12 +38,11 @@
             (>= new-idx (count instruction-list)) (list new-acc :success)
             :else (recur new-acc new-idx new-visited-idxs)))))
 
-
 (defn execute-program
   [program-fn]
   (program-fn 0 0 #{}))
 
-(defn replace-instr
+(defn switch-instr
   [instr]
   (cond (str/starts-with? instr "jmp") (str/replace instr "jmp" "nop")
         (str/starts-with? instr "nop") (str/replace instr "nop" "jmp")))
@@ -60,9 +62,8 @@
         programs (map
                    (fn [idx-to-replace]
                      (build-program
-                       (vec
-                         (map parse-instruction
-                              (update day-8-input idx-to-replace replace-instr)))))
+                       (parse-program
+                         (update day-8-input idx-to-replace switch-instr))))
                    replaceable-instr-idxs)
         successful-program-results
         (filter #(= (second %) :success) (map execute-program programs))]
