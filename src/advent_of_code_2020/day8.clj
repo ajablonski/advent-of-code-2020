@@ -12,16 +12,16 @@
   [[accumulator index] _]
   (list accumulator (+ index 1)))
 
-(defn jump
+(defn jmp
   [[accumulator index] argument]
   (list accumulator (+ index argument)))
 
 (defn parse-instruction
   [instr-string]
-  (let [[_ inst sign number]
+  (let [[everything inst sign number]
         (re-find #"([a-z]{3}) ([+-])([0-9]+)" instr-string)
-        argument ((if (= sign "-") - +) (Integer/parseInt number))
-        inst-fn (cond (= inst "acc") acc (= inst "jmp") jump :else nop)]
+        argument ((resolve (symbol sign)) (Integer/parseInt number))
+        inst-fn (ns-resolve 'advent-of-code-2020.day8 (symbol inst))]
     (fn [state] (inst-fn state argument))))
 
 (defn parse-program
