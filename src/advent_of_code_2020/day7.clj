@@ -28,15 +28,15 @@
 (defn get-bags-containing
   "Gets bags that can contain a certain bag color, directly or indirectly"
   [rules-map color]
-  (let [direct-containers
-        (keep
-          (fn [[k v]] (if (some #(= (:color %) color) v) k))
-          rules-map)]
-    (set/union (set direct-containers)
-               (reduce
-                 #(set/union
-                    %1
-                    (get-bags-containing rules-map %2)) #{} direct-containers))))
+  (let [direct-containers (keep
+                            (fn [[k v]] (if (some #(= (:color %) color) v) k))
+                            rules-map)]
+    (reduce
+      #(set/union
+         %1
+         (get-bags-containing rules-map %2))
+      (set direct-containers)
+      direct-containers)))
 
 (declare get-bags-contained-by)
 
