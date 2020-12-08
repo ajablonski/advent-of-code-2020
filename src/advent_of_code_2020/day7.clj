@@ -45,11 +45,8 @@
     (fn [bag-map {color :color quantity :quantity}]
       (merge-with
         +
-        (update bag-map color
-                (fn [old-value]
-                  (if (nil? old-value)
-                    quantity
-                    (+ old-value quantity))))
+        bag-map
+        {color quantity}
         (map-vals #(* % quantity) (get-bags-contained-by rules-map color))))
     {}
     (get rules-map bag-type)))
