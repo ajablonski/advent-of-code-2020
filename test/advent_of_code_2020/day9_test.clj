@@ -4,18 +4,10 @@
 
 (deftest find-numbers-summing-to-test
   (testing "Finds numbers in set that sum to number"
-    (is (true?
-           (has-numbers-summing-to? 40 #{35
-                                         20
-                                         15
-                                         25
-                                         47})))
     (is (false?
-           (has-numbers-summing-to? 127 #{95
-                                          102
-                                          117
-                                          150
-                                          182})))))
+           (has-no-numbers-summing-to?  #{35 20 15 25 47} 40)))
+    (is (true?
+           (has-no-numbers-summing-to?  #{95 102 117 150 182} 127)))))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"

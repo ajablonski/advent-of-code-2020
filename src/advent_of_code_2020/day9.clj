@@ -4,8 +4,8 @@
 
 (def day-9-input (str/split-lines (slurp (io/resource "day9.txt"))))
 
-(defn has-numbers-summing-to?
-  [result number-set]
+(defn has-no-numbers-summing-to?
+  [number-set result]
   (not
     (empty?
       (filter
@@ -18,13 +18,10 @@
   (->> (subvec number-vector preamble-size)
        (map #(list
                (set (subvec number-vector %1 (+ %1 preamble-size)))
-               %2)
+               %2
+               )
             (range))
-       (filter (fn [[previous-entry-set item]]
-                 (not
-                   (has-numbers-summing-to?
-                     item
-                     previous-entry-set))))
+       (filter #(apply has-no-numbers-summing-to? %))
        first
        second))
 
