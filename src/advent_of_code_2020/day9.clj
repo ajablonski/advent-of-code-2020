@@ -1,28 +1,26 @@
 (ns advent-of-code-2020.day9
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [advent-of-code-2020.utils :refer :all]))
 
 (def day-9-input (str/split-lines (slurp (io/resource "day9.txt"))))
 
 (defn has-no-numbers-summing-to?
   [number-set result]
-  (not
-    (empty?
-      (filter
-        (fn [n]
-          (contains? (disj number-set n) (- result n)))
-        number-set))))
+  (empty?
+    (filter
+      #(contains? (disj number-set %) (- result %))
+      number-set)))
 
 (defn find-invalid-entry
   [number-vector preamble-size]
   (->> (subvec number-vector preamble-size)
-       (map #(list
-               (set (subvec number-vector %1 (+ %1 preamble-size)))
-               %2
-               )
+       (map (fn [start-idx num]
+              (list
+                (set (subvec number-vector start-idx (+ start-idx preamble-size)))
+                num))
             (range))
-       (filter #(apply has-no-numbers-summing-to? %))
-       first
+       (find-first #(apply has-no-numbers-summing-to? %))
        second))
 
 (defn find-contiguous-entries-summing-to
