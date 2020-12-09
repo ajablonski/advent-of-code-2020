@@ -1,4 +1,4 @@
-(ns advent-of-code-2020.day2_test
+(ns advent-of-code-2020.day2-test
   (:require [clojure.test :refer :all]
             [advent-of-code-2020.day2 :refer :all])
   (:import (advent_of_code_2020.day2 Rule RuleAndPassword)))

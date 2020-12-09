@@ -1,4 +1,4 @@
-(ns advent-of-code-2020.day17_test
+(ns advent-of-code-2020.day17-test
   (:require [clojure.test :refer :all]
             [advent-of-code-2020.day17 :refer :all]))
 
