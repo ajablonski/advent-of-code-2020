@@ -3,16 +3,14 @@
             [clojure.string :as str]
             [advent-of-code-2020.utils :refer :all]))
 
-(def day-17-input (io/resource "day17.txt"))
+(def day-17-input (slurp (io/resource "day17.txt")))
 
 (defn main-1
   []
-  (println
-    (slurp day-17-input)))
+  (println day-17-input))
 
 (defn main-2
   []
-  (println
-    (slurp day-17-input)))
+  (println day-17-input))
 
       
