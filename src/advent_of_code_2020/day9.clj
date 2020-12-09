@@ -15,18 +15,18 @@
 
 (defn find-invalid-entry
   [number-vector preamble-size]
-  (first
-    (filter
-      (fn [[previous-entry-set item]]
-        (not
-          (has-numbers-summing-to?
-            item
-            previous-entry-set)))
-      (map #(list
-              (set (subvec number-vector %1 (+ %1 preamble-size)))
-              %2)
-           (range)
-           (subvec number-vector preamble-size)))))
+  (->> (subvec number-vector preamble-size)
+       (map #(list
+               (set (subvec number-vector %1 (+ %1 preamble-size)))
+               %2)
+            (range))
+       (filter (fn [[previous-entry-set item]]
+                 (not
+                   (has-numbers-summing-to?
+                     item
+                     previous-entry-set))))
+       first
+       second))
 
 (defn find-contiguous-entries-summing-to
   [number-vector target-number]
@@ -41,17 +41,17 @@
 (defn main-1
   ([] (main-1 25))
   ([preamble-size]
-   (let
-     [numbers (vec (map bigint day-9-input))]
-     (println
-       (second (find-invalid-entry numbers preamble-size))))))
+   (println
+     (find-invalid-entry
+       (vec (map bigint day-9-input))
+       preamble-size))))
 
 (defn main-2
   ([] (main-2 25))
   ([preamble-size]
    (let
      [numbers (vec (map bigint day-9-input))
-      [_ invalid-entry] (find-invalid-entry numbers preamble-size)
+      invalid-entry (find-invalid-entry numbers preamble-size)
       range-nums (find-contiguous-entries-summing-to numbers invalid-entry)]
      (println
        (+ (reduce min range-nums) (reduce max range-nums))))))
