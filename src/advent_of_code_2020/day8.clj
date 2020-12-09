@@ -18,7 +18,7 @@
 
 (defn parse-instruction
   [instr-string]
-  (let [[everything inst sign number]
+  (let [[_ inst sign number]
         (re-find #"([a-z]{3}) ([+-])([0-9]+)" instr-string)
         argument ((resolve (symbol sign)) (Integer/parseInt number))
         inst-fn (ns-resolve 'advent-of-code-2020.day8 (symbol inst))]
