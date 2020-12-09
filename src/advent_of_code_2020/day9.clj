@@ -26,12 +26,12 @@
 (defn find-contiguous-entries-summing-to
   [number-vector target-number]
   (loop [start-idx 0
-         end-idx 0]
-    (let [subvector (subvec number-vector start-idx end-idx)
-          sum-in-range (reduce + subvector)]
-      (cond (< sum-in-range target-number) (recur start-idx (+ end-idx 1))
-            (> sum-in-range target-number) (recur (+ start-idx 1) end-idx)
-            :else subvector))))
+         end-idx 1]
+    (let [values-to-sum (subvec number-vector start-idx end-idx)
+          sum-of-values (reduce + values-to-sum)]
+      (cond (< sum-of-values target-number) (recur start-idx (+ end-idx 1))
+            (> sum-of-values target-number) (recur (+ start-idx 1) end-idx)
+            :else values-to-sum))))
 
 (defn main-1
   ([] (main-1 25))

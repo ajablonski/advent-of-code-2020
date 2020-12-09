@@ -12,8 +12,13 @@
 (deftest find-invalid-entry-test
   (testing "Finds the first number in the ordered list
   which is not a sum of the previous preamble-entry numbers"
-    (is (= (find-invalid-entry [1 2 3 4] 2)
-           4))))
+    (is (= (find-invalid-entry [1 2 3 6 9 15] 2)
+           6))))
+
+(deftest find-contiguous-entries-summing-to-test
+  (testing "Finds contiguous numbers that sum to a given number"
+    (is (= (find-contiguous-entries-summing-to [1 2 3 6 9 15] 6)
+           [1 2 3]))))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
