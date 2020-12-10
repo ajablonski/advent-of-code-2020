@@ -32,18 +32,17 @@
      curr-item (first (rest adapters))
      remaining-items (rest (rest adapters))
      subgraphs (list (list (first adapters)))]
-    (cond (empty? remaining-items)
-          (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs)))
-          (< curr-item (+ prev-item 3))
-          (recur curr-item
-                 (first remaining-items)
-                 (rest remaining-items)
-                 (cons (cons curr-item (first subgraphs)) (rest subgraphs)))
-          (= curr-item (+ prev-item 3))
-          (recur curr-item
-                 (first remaining-items)
-                 (rest remaining-items)
-                 (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs)))))))
+    (let [new-subgraphs
+          (cond (< curr-item (+ prev-item 3))
+                (cons (cons curr-item (first subgraphs)) (rest subgraphs))
+                (= curr-item (+ prev-item 3))
+                (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs))))]
+      (if (empty? remaining-items)
+        new-subgraphs
+        (recur curr-item
+               (first remaining-items)
+               (rest remaining-items)
+               new-subgraphs)))))
 
 (defn get-total-arrangements-count
   [input-adapters]
