@@ -29,18 +29,18 @@
                next-item-possibilities)))))
 
 (defn get-subgraphs
-  [adapters]
+  [[starting-joltage adapter-1 & other-adapters]]
   (loop
-    [prev-item (first adapters)
-     curr-item (first (rest adapters))
-     remaining-items (rest (rest adapters))
-     subgraphs (list (list (first adapters)))]
+    [prev-item starting-joltage
+     curr-item adapter-1
+     remaining-items other-adapters
+     [active-subgraph & other-subgraphs] (list (list starting-joltage))]
     (let [jump-size (- curr-item prev-item)
           new-subgraphs
           (cond (< jump-size max-jump-size)
-                (cons (cons curr-item (first subgraphs)) (rest subgraphs))
+                (cons (cons curr-item active-subgraph) other-subgraphs)
                 (= jump-size max-jump-size)
-                (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs))))]
+                (cons (list curr-item) (cons (reverse active-subgraph) other-subgraphs)))]
       (if (empty? remaining-items)
         new-subgraphs
         (recur curr-item
