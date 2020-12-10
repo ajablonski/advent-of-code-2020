@@ -9,9 +9,14 @@
 
 (defn get-joltage-differences-counts
   [input-adapters]
-  (let [differences (map (fn [input output] (- output input))
-                         (sort (conj input-adapters 0))
-                         (sort (conj input-adapters (+ (apply max input-adapters) max-jump-size))))]
+  (let [differences
+        (map (fn [input output] (- output input))
+             (sort
+               (conj input-adapters
+                     0))
+             (sort
+               (conj input-adapters
+                     (+ (apply max input-adapters) max-jump-size))))]
     (map-vals count (group-by identity differences))))
 
 (defn get-arrangements
@@ -29,29 +34,38 @@
                next-item-possibilities)))))
 
 (defn get-subgraphs
-  [[starting-joltage adapter-1 & other-adapters]]
-  (loop
-    [prev-item starting-joltage
-     curr-item adapter-1
-     remaining-items other-adapters
-     [active-subgraph & other-subgraphs] (list (list starting-joltage))]
-    (let [jump-size (- curr-item prev-item)
-          new-subgraphs
-          (cond (< jump-size max-jump-size)
-                (cons (cons curr-item active-subgraph) other-subgraphs)
-                (= jump-size max-jump-size)
-                (cons (list curr-item) (cons (reverse active-subgraph) other-subgraphs)))]
-      (if (empty? remaining-items)
-        new-subgraphs
-        (recur curr-item
-               (first remaining-items)
-               (rest remaining-items)
-               new-subgraphs)))))
+  ([adapters]
+   (get-subgraphs
+     (first adapters)
+     (second adapters)
+     (rest (rest adapters))
+     (list (list (first adapters)))))
+  ([prev-item curr-item remaining-items [active-subgraph & other-subgraphs]]
+   (let [jump-size (- curr-item prev-item)
+         new-subgraphs (cond (< jump-size max-jump-size)
+                             (cons
+                               (cons curr-item active-subgraph)
+                               other-subgraphs)
+                             (= jump-size max-jump-size)
+                             (cons
+                               (list curr-item)
+                               (cons
+                                 (reverse active-subgraph)
+                                 other-subgraphs)))]
+     (if (empty? remaining-items)
+       new-subgraphs
+       (recur curr-item
+              (first remaining-items)
+              (rest remaining-items)
+              new-subgraphs)))))
 
 (defn get-total-arrangements-count
   [input-adapters]
   (let [sorted-adapters-with-start-and-end
-        (sort (conj input-adapters 0 (+ (apply max input-adapters) max-jump-size)))
+        (sort
+          (conj input-adapters
+                0
+                (+ (apply max input-adapters) max-jump-size)))
         subgraph-possibility-counts
         (map
           #(count (get-arrangements %))
