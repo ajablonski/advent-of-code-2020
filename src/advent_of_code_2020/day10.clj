@@ -34,12 +34,12 @@
                next-item-possibilities)))))
 
 (defn get-subgraphs
-  ([adapters]
+  ([joltages]
    (get-subgraphs
-     (first adapters)
-     (second adapters)
-     (rest (rest adapters))
-     (list (list (first adapters)))))
+     (first joltages)
+     (second joltages)
+     (rest (rest joltages))
+     (list (list (first joltages)))))
   ([prev-item curr-item remaining-items [active-subgraph & other-subgraphs]]
    (let [jump-size (- curr-item prev-item)
          new-subgraphs (cond (< jump-size max-jump-size)
@@ -61,7 +61,7 @@
 
 (defn get-total-arrangements-count
   [input-adapters]
-  (let [sorted-adapters-with-start-and-end
+  (let [sorted-joltages-with-start-and-end
         (sort
           (conj input-adapters
                 0
@@ -69,7 +69,7 @@
         subgraph-possibility-counts
         (map
           #(count (get-arrangements %))
-          (get-subgraphs sorted-adapters-with-start-and-end))]
+          (get-subgraphs sorted-joltages-with-start-and-end))]
     (apply * subgraph-possibility-counts)))
 
 (defn main-1
