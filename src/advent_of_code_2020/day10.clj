@@ -18,7 +18,8 @@
   ([sorted-items]
    (get-arrangements (first sorted-items) (rest sorted-items) '()))
   ([starting-item remaining-items result-so-far]
-   (let [next-item-possibilities (filter #(<= % (+ starting-item max-jump-size)) remaining-items)]
+   (let [next-item-possibilities
+         (filter #(<= % (+ starting-item max-jump-size)) remaining-items)]
      (if (empty? remaining-items)
        (list (reverse (cons starting-item result-so-far)))
        (mapcat (fn [next-item]
@@ -34,10 +35,11 @@
      curr-item (first (rest adapters))
      remaining-items (rest (rest adapters))
      subgraphs (list (list (first adapters)))]
-    (let [new-subgraphs
-          (cond (< curr-item (+ prev-item max-jump-size))
+    (let [jump-size (- curr-item prev-item)
+          new-subgraphs
+          (cond (< jump-size max-jump-size)
                 (cons (cons curr-item (first subgraphs)) (rest subgraphs))
-                (= curr-item (+ prev-item max-jump-size))
+                (= jump-size max-jump-size)
                 (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs))))]
       (if (empty? remaining-items)
         new-subgraphs
