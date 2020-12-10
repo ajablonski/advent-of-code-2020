@@ -5,18 +5,20 @@
 
 (def day-10-input (slurp (io/resource "day10.txt")))
 
+(def max-jump-size 3)
+
 (defn get-joltage-differences-counts
   [input-adapters]
   (let [differences (map (fn [input output] (- output input))
                          (sort (conj input-adapters 0))
-                         (sort (conj input-adapters (+ (apply max input-adapters) 3))))]
+                         (sort (conj input-adapters (+ (apply max input-adapters) max-jump-size))))]
     (map-vals count (group-by identity differences))))
 
 (defn get-arrangements
   ([sorted-items]
    (get-arrangements (first sorted-items) (rest sorted-items) '()))
   ([starting-item remaining-items result-so-far]
-   (let [next-item-possibilities (filter #(<= % (+ starting-item 3)) remaining-items)]
+   (let [next-item-possibilities (filter #(<= % (+ starting-item max-jump-size)) remaining-items)]
      (if (empty? remaining-items)
        (list (reverse (cons starting-item result-so-far)))
        (mapcat (fn [next-item]
@@ -33,9 +35,9 @@
      remaining-items (rest (rest adapters))
      subgraphs (list (list (first adapters)))]
     (let [new-subgraphs
-          (cond (< curr-item (+ prev-item 3))
+          (cond (< curr-item (+ prev-item max-jump-size))
                 (cons (cons curr-item (first subgraphs)) (rest subgraphs))
-                (= curr-item (+ prev-item 3))
+                (= curr-item (+ prev-item max-jump-size))
                 (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs))))]
       (if (empty? remaining-items)
         new-subgraphs
@@ -47,7 +49,7 @@
 (defn get-total-arrangements-count
   [input-adapters]
   (let [sorted-adapters-with-start-and-end
-        (sort (conj input-adapters 0 (+ (apply max input-adapters) 3)))
+        (sort (conj input-adapters 0 (+ (apply max input-adapters) max-jump-size)))
         subgraph-possibility-counts
         (map
           #(count (get-arrangements %))
