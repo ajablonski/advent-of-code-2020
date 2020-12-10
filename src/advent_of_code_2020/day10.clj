@@ -5,7 +5,7 @@
 
 (def day-10-input (slurp (io/resource "day10.txt")))
 
-(defn get-joltage-differences
+(defn get-joltage-differences-counts
   [input-adapters]
   (let [differences (map (fn [input output] (- output input))
                          (sort (conj input-adapters 0))
@@ -43,32 +43,27 @@
                  (rest remaining-items)
                  (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs)))))))
 
-(defn get-subgraphs-wrapper
-  [adapters]
-  (reverse (get-subgraphs
-             (sort
-               (conj
-                 (conj adapters 0)
-                 (+ (apply max adapters) 3))))))
-
-(defn get-arrangements-wrapper
+(defn get-total-arrangements-count
   [input-adapters]
-  (let [subgraphs (get-subgraphs-wrapper input-adapters)
-        subgraph-possibilities (map
-                                 (fn [subgraph] (get-arrangements (first subgraph) (rest subgraph) '()))
-                                 subgraphs)]
+  (let [sorted-adapters-with-start-and-end
+        (sort (conj input-adapters 0 (+ (apply max input-adapters) 3)))
+        subgraphs
+        (get-subgraphs sorted-adapters-with-start-and-end)
+        subgraph-possibilities
+        (map
+          (fn [subgraph] (count (get-arrangements (first subgraph) (rest subgraph) '())))
+          subgraphs)]
     (apply
       *
-      (map count subgraph-possibilities))))
-
+      subgraph-possibilities)))
 
 (defn main-1
   []
-  (let [ints (map #(Integer/parseInt %) (str/split-lines day-10-input))
-        diffs (get-joltage-differences (set ints))]
+  (let [adapters (map #(Integer/parseInt %) (str/split-lines day-10-input))
+        diffs (get-joltage-differences-counts (set adapters))]
     (println (* (get diffs 3) (get diffs 1)))))
 
 (defn main-2
   []
-  (let [ints (map #(Integer/parseInt %) (str/split-lines day-10-input))]
-    (println (get-arrangements-wrapper ints))))
+  (let [adapters (map #(Integer/parseInt %) (str/split-lines day-10-input))]
+    (println (get-total-arrangements-count adapters))))
