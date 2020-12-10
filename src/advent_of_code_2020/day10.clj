@@ -13,25 +13,56 @@
     (map-vals count (group-by identity differences))))
 
 (defn get-arrangements
-  [starting-item remaining-items result-so-far]
+  [starting-item remaining-items]
   (let [next-item-possibilities (filter #(<= % (+ starting-item 3)) remaining-items)]
     (if (empty? remaining-items)
-      (list (reverse (cons starting-item result-so-far)))
-      (mapcat (fn [next-item]
-             (get-arrangements next-item
-                               (filter #(> % next-item) remaining-items)
-                               (cons starting-item result-so-far)))
-           next-item-possibilities))))
+      1
+      (let [result (reduce
+                     +
+                     (map
+                       (fn [next-item]
+                         (get-arrangements next-item
+                                           (filter #(> % next-item) remaining-items)))
+                       next-item-possibilities))]
+        result))))
+
+(defn get-subgraphs
+  [adapters]
+  (loop
+    [prev-item (first adapters)
+     curr-item (first (rest adapters))
+     remaining-items (rest (rest adapters))
+     subgraphs (list (list (first adapters)))]
+    (cond (empty? remaining-items)
+          (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs)))
+          (< curr-item (+ prev-item 3))
+          (recur curr-item
+                 (first remaining-items)
+                 (rest remaining-items)
+                 (cons (cons curr-item (first subgraphs)) (rest subgraphs)))
+          (= curr-item (+ prev-item 3))
+          (recur curr-item
+                 (first remaining-items)
+                 (rest remaining-items)
+                 (cons (list curr-item) (cons (reverse (first subgraphs)) (rest subgraphs)))))))
+
+(defn get-subgraphs-wrapper
+  [adapters]
+  (reverse (get-subgraphs
+             (sort
+               (conj
+                 (conj adapters 0)
+                 (+ (apply max adapters) 3))))))
 
 (defn get-arrangements-wrapper
   [input-adapters]
-  (let [sorted-adapters (sort
-                          (conj
-                            (conj input-adapters 0)
-                            (+ (apply max input-adapters) 3)))
-        ]
-    (get-arrangements (first sorted-adapters) (rest sorted-adapters) '())))
-
+  (let [subgraphs (get-subgraphs-wrapper input-adapters)
+        subgraph-possibilities (map
+                                 (fn [subgraph] (get-arrangements (first subgraph) (rest subgraph)))
+                                 subgraphs)]
+    (apply
+      *
+      subgraph-possibilities)))
 
 
 (defn main-1
@@ -43,4 +74,4 @@
 (defn main-2
   []
   (let [ints (map #(Integer/parseInt %) (str/split-lines day-10-input))]
-    (println (count (get-arrangements-wrapper ints)))))
+    (println (get-arrangements-wrapper ints))))
