@@ -53,7 +53,7 @@
                                  (reverse active-subgraph)
                                  other-subgraphs)))]
      (if (empty? remaining-items)
-       new-subgraphs
+       (cons (reverse (first new-subgraphs)) (rest new-subgraphs))
        (recur curr-item
               (first remaining-items)
               (rest remaining-items)
@@ -64,8 +64,7 @@
   (let [sorted-joltages-with-start-and-end
         (sort
           (conj input-adapters
-                0
-                (+ (apply max input-adapters) max-jump-size)))
+                0))
         subgraph-possibility-counts
         (map
           #(count (get-arrangements %))
