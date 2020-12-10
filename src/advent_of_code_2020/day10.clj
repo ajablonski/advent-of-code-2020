@@ -13,18 +13,15 @@
     (map-vals count (group-by identity differences))))
 
 (defn get-arrangements
-  [starting-item remaining-items]
+  [starting-item remaining-items result-so-far]
   (let [next-item-possibilities (filter #(<= % (+ starting-item 3)) remaining-items)]
     (if (empty? remaining-items)
-      1
-      (let [result (reduce
-                     +
-                     (map
-                       (fn [next-item]
-                         (get-arrangements next-item
-                                           (filter #(> % next-item) remaining-items)))
-                       next-item-possibilities))]
-        result))))
+      (list (reverse (cons starting-item result-so-far)))
+      (mapcat (fn [next-item]
+                (get-arrangements next-item
+                                  (filter #(> % next-item) remaining-items)
+                                  (cons starting-item result-so-far)))
+              next-item-possibilities))))
 
 (defn get-subgraphs
   [adapters]
@@ -58,11 +55,11 @@
   [input-adapters]
   (let [subgraphs (get-subgraphs-wrapper input-adapters)
         subgraph-possibilities (map
-                                 (fn [subgraph] (get-arrangements (first subgraph) (rest subgraph)))
+                                 (fn [subgraph] (get-arrangements (first subgraph) (rest subgraph) '()))
                                  subgraphs)]
     (apply
       *
-      subgraph-possibilities)))
+      (map count subgraph-possibilities))))
 
 
 (defn main-1
