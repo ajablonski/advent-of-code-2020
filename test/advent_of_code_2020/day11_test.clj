@@ -23,7 +23,6 @@
            (step-1 [[\. \# \.] [\# \L \#] [\. \# \.]])))
     ))
 
-
 (deftest step-2-test
   (testing "second step function"
     (is (= [[\# \# \L]
@@ -43,25 +42,22 @@
                  [\# \. \# \# \# \# \# \# \. \#]
                  [\# \. \# \# \# \# \# \. \# \#]]]
       (is (= [
-              [\# \. \L \L \. \L \L \. \L \# ]
-              [\# \L \L \L \L \L \L \. \L \L ]
-              [\L \. \L \. \L \. \. \L \. \. ]
-              [\L \L \L \L \. \L \L \. \L \L ]
-              [\L \. \L \L \. \L \L \. \L \L ]
-              [\L \. \L \L \L \L \L \. \L \L ]
-              [\. \. \L \. \L \. \. \. \. \. ]
-              [\L \L \L \L \L \L \L \L \L \# ]
-              [\# \. \L \L \L \L \L \L \. \L ]
-              [\# \. \L \L \L \L \L \. \L \# ]
+              [\# \. \L \L \. \L \L \. \L \#]
+              [\# \L \L \L \L \L \L \. \L \L]
+              [\L \. \L \. \L \. \. \L \. \.]
+              [\L \L \L \L \. \L \L \. \L \L]
+              [\L \. \L \L \. \L \L \. \L \L]
+              [\L \. \L \L \L \L \L \. \L \L]
+              [\. \. \L \. \L \. \. \. \. \.]
+              [\L \L \L \L \L \L \L \L \L \#]
+              [\# \. \L \L \L \L \L \L \. \L]
+              [\# \. \L \L \L \L \L \. \L \#]
               ]
              (step-2 start))))
-    (is (= (parse-seat-grid
-             "#.L#.##.L#\n#L#####.LL\nL.#.#..#..\n##L#.##.##\n#.##.#L.##\n#.#####.#L\n..#.#.....\nLLL####LL#\n#.L#####.L\n#.L####.L#")
+    (is (= (parse-seat-grid "#.L#.##.L#\n#L#####.LL\nL.#.#..#..\n##L#.##.##\n#.##.#L.##\n#.#####.#L\n..#.#.....\nLLL####LL#\n#.L#####.L\n#.L####.L#")
            (step-2 (parse-seat-grid "#.LL.LL.L#\n#LLLLLL.LL\nL.L.L..L..\nLLLL.LL.LL\nL.LL.LL.LL\nL.LLLLL.LL\n..L.L.....\nLLLLLLLLL#\n#.LLLLLL.L\n#.LLLLL.L#"))))
 
     ))
-
-
 
 (deftest get-first-visible-in-line-test
   (testing "Should return the first visible seat type"
@@ -75,8 +71,7 @@
            (get-first-visible-in-line [])))
     ))
 
-
-(deftest get-diagonals-test
+(deftest get-diagonal-lines-of-sight-test
   (testing "Should get all 4 diagonals starting with upper right"
     (is (= (list
              '(\. \.)
@@ -84,7 +79,7 @@
              '(\.)
              '(\#)
              )
-           (get-diagonals
+           (get-diagonal-lines-of-sight
              [[\. \. \. \. \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
@@ -94,7 +89,7 @@
     (is (= (list
              '() '() '() '(\L \#)
              )
-           (get-diagonals
+           (get-diagonal-lines-of-sight
              [[\# \# \L]
               [\# \L \L]
               [\L \L \L]]
@@ -102,13 +97,13 @@
 
     ))
 
-(deftest get-rows-test
+(deftest get-row-lines-of-sight-test
   (testing "Should get all 4 diagonals starting with upper right"
     (is (= (list
              '(\. \#)
              '(\. \L)
              )
-           (get-rows
+           (get-row-lines-of-sight
              [[\. \. \. \. \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
@@ -117,13 +112,13 @@
              1 2)))
     ))
 
-(deftest get-rows-test
+(deftest get-col-lines-of-sight-test
   (testing "Should get all 4 diagonals starting with upper right"
     (is (= (list
              '(\. \L)
              '(\. \#)
              )
-           (get-cols
+           (get-col-lines-of-sight
              [[\. \. \L \. \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
