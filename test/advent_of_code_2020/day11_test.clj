@@ -129,9 +129,9 @@
 (deftest integration-test-main-1
   (testing "Integration test part 1"
     (is (= "37\n"
-           (with-out-str (main-1))))))
+           (with-out-str (with-minimal-output (main-1)))))))
 
 (deftest integration-test-main-2
   (testing "Integration test part 2"
     (is (= "26\n"
-           (with-out-str (main-2))))))
+           (with-out-str (with-minimal-output (main-2)))))))

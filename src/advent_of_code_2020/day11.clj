@@ -5,6 +5,17 @@
 
 (def day-11-input (slurp (io/resource "day11.txt")))
 
+(def ^:dynamic *verbose* true)
+
+(defmacro printlnv
+  [& args]
+  `(when *verbose*
+     (println ~@args)))
+
+(defmacro with-minimal-output
+  [& body]
+  `(binding [*verbose* false] ~@body))
+
 (defn parse-seat-grid
   [seat-grid-string]
   (vec (map #(vec (seq (char-array %))) (str/split-lines seat-grid-string))))
@@ -158,16 +169,16 @@
     +
     (map
       (fn [row] (count (filter #(= % \#) row)))
-      grid))
-  )
+      grid)))
 
 (defn print-grid
   [grid]
-  (println "GRID")
-  (doseq [row grid] (println (apply str row))))
+  (printlnv "\n\n~~~~~GRID~~~~~")
+  (doseq [row grid] (printlnv (apply str row))))
 
 (defn stabilize
   [seat-grid step-fn]
+  (print-grid seat-grid)
   (let [next-grid (step-fn seat-grid)]
     (if (= next-grid seat-grid)
       seat-grid
