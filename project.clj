@@ -3,7 +3,8 @@
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url  "https://www.eclipse.org/legal/epl-2.0/"}
-  :dependencies [[org.clojure/clojure "1.10.1"]]
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [com.taoensso/tufte "2.2.0"]]
   :plugins [[lein-pprint "1.3.2"]]
   :profiles {:dev {:resource-paths ["test_resources"]}
              :day1-1 {:main advent-of-code-2020.day1/main-1}
