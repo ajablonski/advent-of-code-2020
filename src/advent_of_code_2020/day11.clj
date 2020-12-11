@@ -75,53 +75,53 @@
 
 (defn get-first-visible-in-line
   [seats]
-  (reduce
-    (fn [vis seat] (if (= vis \.) seat vis))
-    \.
-    seats))
+  (or (some (fn [seat] (when (not (= seat \.)) seat)) seats)
+      \.))
 
-(defn get-row-lines-of-sight
+(defn get-horizontal-visible-seats
   [grid anchor-row anchor-col]
-  (list
-    (vec (reverse (subvec (get grid anchor-row) 0 (max 0 anchor-col))))
-    (subvec (get grid anchor-row) (+ anchor-col 1))))
+  (map get-first-visible-in-line
+       (list
+         (reverse (subvec (get grid anchor-row) 0 (max 0 anchor-col)))
+         (subvec (get grid anchor-row) (+ anchor-col 1)))))
 
-(defn get-col-lines-of-sight
+(defn get-vertical-visible-seats
   [grid anchor-row anchor-col]
-  (list
-    (vec (reverse (map #(get % anchor-col) (subvec grid 0 (max 0 anchor-row)))))
-    (map #(get % anchor-col) (subvec grid (+ anchor-row 1)))))
+  (map get-first-visible-in-line
+       (list
+         (reverse (map #(get % anchor-col) (subvec grid 0 (max 0 anchor-row))))
+         (map #(get % anchor-col) (subvec grid (+ anchor-row 1))))))
 
-(defn- get-diagonal-line-of-sight
+(defn- get-diagonal-first-visible
   [grid start-row start-col row-change-fn col-change-fn]
   (let [max-col (- (count (first grid)) 1)
         max-row (- (count grid) 1)]
     (loop
-      [items '()
+      [visible-item \.
        curr-row start-row
        curr-col start-col]
       (if (and (<= 0 curr-row max-row)
-               (<= 0 curr-col max-col))
+               (<= 0 curr-col max-col)
+               (= visible-item \.))
         (recur
-          (cons (get-in grid [curr-row curr-col]) items)
+          (get-in grid [curr-row curr-col])
           (row-change-fn curr-row)
           (col-change-fn curr-col))
-        (reverse items)))))
+        visible-item))))
 
-(defn get-diagonal-lines-of-sight
+(defn get-diagonal-visible-seats
   [grid anchor-row anchor-col]
   (list
-    (get-diagonal-line-of-sight grid (- anchor-row 1) (+ anchor-col 1) dec inc)
-    (get-diagonal-line-of-sight grid (+ anchor-row 1) (+ anchor-col 1) inc inc)
-    (get-diagonal-line-of-sight grid (+ anchor-row 1) (- anchor-col 1) inc dec)
-    (get-diagonal-line-of-sight grid (- anchor-row 1) (- anchor-col 1) dec dec)))
+    (get-diagonal-first-visible grid (- anchor-row 1) (+ anchor-col 1) dec inc)
+    (get-diagonal-first-visible grid (+ anchor-row 1) (+ anchor-col 1) inc inc)
+    (get-diagonal-first-visible grid (+ anchor-row 1) (- anchor-col 1) inc dec)
+    (get-diagonal-first-visible grid (- anchor-row 1) (- anchor-col 1) dec dec)))
 
 (defn- visibles-meet-condition?
   [grid row-num col-num p]
-  (let [entries (concat (get-row-lines-of-sight grid row-num col-num)
-                        (get-col-lines-of-sight grid row-num col-num)
-                        (get-diagonal-lines-of-sight grid row-num col-num))
-        visibles (map get-first-visible-in-line entries)]
+  (let [visibles (concat (get-vertical-visible-seats grid row-num col-num)
+                         (get-horizontal-visible-seats grid row-num col-num)
+                         (get-diagonal-visible-seats grid row-num col-num))]
     (p visibles)))
 
 (defn too-many-visible-occupied?

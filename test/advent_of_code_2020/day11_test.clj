@@ -71,39 +71,28 @@
            (get-first-visible-in-line [])))
     ))
 
-(deftest get-diagonal-lines-of-sight-test
+(deftest get-diagonal-visible-seats-test
   (testing "Should get all 4 diagonals starting with upper right"
-    (is (= (list
-             '(\. \.)
-             '(\. \L)
-             '(\.)
-             '(\#)
-             )
-           (get-diagonal-lines-of-sight
-             [[\. \. \. \. \L]
+    (is (= (list \# \L \. \#)
+           (get-diagonal-visible-seats
+             [[\. \. \. \# \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
-              [\. \. \. \. \L]
-              [\. \. \. \L \L]]
+              [\. \. \L \. \L]
+              [\. \. \. \# \L]]
              2 1)))
-    (is (= (list
-             '() '() '() '(\L \#)
-             )
-           (get-diagonal-lines-of-sight
+    (is (= (list \. \. \. \L)
+           (get-diagonal-visible-seats
              [[\# \# \L]
               [\# \L \L]
               [\L \L \L]]
              2 2)))
-
     ))
 
-(deftest get-row-lines-of-sight-test
+(deftest get-horizontal-visible-seats-test
   (testing "Should get all 4 diagonals starting with upper right"
-    (is (= (list
-             '(\. \#)
-             '(\. \L)
-             )
-           (get-row-lines-of-sight
+    (is (= (list \# \L)
+           (get-horizontal-visible-seats
              [[\. \. \. \. \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
@@ -112,13 +101,10 @@
              1 2)))
     ))
 
-(deftest get-col-lines-of-sight-test
+(deftest get-vertical-visible-seats-test
   (testing "Should get all 4 diagonals starting with upper right"
-    (is (= (list
-             '(\. \L)
-             '(\. \#)
-             )
-           (get-col-lines-of-sight
+    (is (= (list \L \#)
+           (get-vertical-visible-seats
              [[\. \. \L \. \L]
               [\# \. \. \. \L]
               [\. \. \. \. \L]
@@ -126,6 +112,7 @@
               [\. \. \# \L \L]]
              2 2)))
     ))
+
 (deftest integration-test-main-1
   (testing "Integration test part 1"
     (is (= "37\n"
