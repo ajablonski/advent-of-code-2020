@@ -6,16 +6,16 @@
 (def day-12-input (slurp (io/resource "day12.txt")))
 
 (defn parse-input-line
-  [line parser-map]
+  [line instruction-map]
   (let [[_ command amount] (re-find #"([A-Z])([0-9]+)" line)]
     (fn [state]
-      ((parser-map command)
+      ((instruction-map command)
        state
        (Integer/parseInt amount)))))
 
 (defn parse-input-lines
-  [input parser-map]
-  (map #(parse-input-line % parser-map) (str/split-lines input)))
+  [input instruction-map]
+  (map #(parse-input-line % instruction-map) (str/split-lines input)))
 
 (defn move-n
   [current-state amount]
@@ -48,11 +48,12 @@
 (def turn-right
   (turn {:N :E, :E :S, :S :W, :W :N}))
 
-(let [move-map {:N move-n, :W move-w, :E move-e, :S move-s}]
-  (defn move-forward
-    [current-state amount]
-    (let [direction (current-state :direction)]
-      ((move-map direction) current-state amount))))
+(defn move-forward
+  [current-state amount]
+  (({:N move-n, :W move-w, :E move-e, :S move-s}
+    (:direction current-state))
+   current-state
+   amount))
 
 (defn move-waypoint-n
   [current-state amount]
@@ -69,7 +70,6 @@
 (defn move-waypoint-w
   [current-state amount]
   (update current-state :waypoint-x #(- % amount)))
-
 
 (defn- rotate-waypoint
   [x-update-fn y-update-fn]
@@ -99,12 +99,11 @@
   (+ (Math/abs (:x state))
      (Math/abs (:y state))))
 
-
 (defn- do-main
   [instruction-map initial-state]
-  (let [steps (parse-input-lines day-12-input instruction-map)
-        final-pos (reduce (fn [state step] (step state)) initial-state steps)]
-    (get-manhattan-distance final-pos)))
+  (->> (parse-input-lines day-12-input instruction-map)
+       (reduce (fn [state step] (step state)) initial-state)
+       get-manhattan-distance))
 
 (defn main-1
   []

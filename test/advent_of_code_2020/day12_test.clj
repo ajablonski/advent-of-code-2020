@@ -31,8 +31,7 @@
     (is (= ({:x 0 :y -1 :direction :W}
             (move-forward {:x 0 :y 0 :direction :S} 1))))
     (is (= ({:x -1 :y 0 :direction :W}
-            (move-forward {:x 0 :y 0 :direction :W} 1))))
-    ))
+            (move-forward {:x 0 :y 0 :direction :W} 1))))))
 
 (deftest turn-l-test
   (testing "Should turn left"
@@ -51,8 +50,7 @@
     (is (= ({:x 0 :y 0 :direction :N}
             (turn-left {:x 0 :y 0 :direction :S} 180))))
     (is (= ({:x 0 :y 0 :direction :E}
-            (turn-left {:x 0 :y 0 :direction :W} 180))))
-    ))
+            (turn-left {:x 0 :y 0 :direction :W} 180))))))
 
 (deftest turn-r-test
   (testing "Should turn right"
@@ -71,9 +69,7 @@
     (is (= ({:x 0 :y 0 :direction :W}
             (turn-right {:x 0 :y 0 :direction :E} 180))))
     (is (= ({:x 0 :y 0 :direction :N}
-            (turn-right {:x 0 :y 0 :direction :S} 180))))
-    ))
-
+            (turn-right {:x 0 :y 0 :direction :S} 180))))))
 
 (deftest move-waypoint-n-test
   (testing "Should move waypoint to the N"
@@ -100,8 +96,7 @@
     (is (= ({:x 2 :y 1 :waypoint-x 2 :waypoint-y 1}
             (move-towards-waypoint {:x 0 :y 0 :waypoint-x 2 :waypoint-y 1} 1))))
     (is (= ({:x 6 :y 3 :waypoint-x 2 :waypoint-y 1}
-            (move-towards-waypoint {:x 0 :y 0 :waypoint-x 2 :waypoint-y 1} 3))))
-    ))
+            (move-towards-waypoint {:x 0 :y 0 :waypoint-x 2 :waypoint-y 1} 3))))))
 
 (deftest rotate-waypoint-l-test
   (testing "Should rotate waypoint left"
@@ -120,8 +115,7 @@
     (is (= {:x 0 :y 0 :waypoint-x 10 :waypoint-y 4}
            (rotate-waypoint-l {:x 0 :y 0 :waypoint-x -10 :waypoint-y -4} 180)))
     (is (= {:x 0 :y 0 :waypoint-x -4 :waypoint-y 10}
-           (rotate-waypoint-l {:x 0 :y 0 :waypoint-x 4 :waypoint-y -10} 180)))
-    ))
+           (rotate-waypoint-l {:x 0 :y 0 :waypoint-x 4 :waypoint-y -10} 180)))))
 
 (deftest rotate-waypoint-r-test
   (testing "Should rotate waypoint right"
@@ -140,9 +134,7 @@
     (is (= {:x 0 :y 0 :waypoint-x 10 :waypoint-y 4}
            (rotate-waypoint-r {:x 0 :y 0 :waypoint-x -10 :waypoint-y -4} 180)))
     (is (= {:x 0 :y 0 :waypoint-x -4 :waypoint-y 10}
-           (rotate-waypoint-r {:x 0 :y 0 :waypoint-x 4 :waypoint-y -10} 180)))
-    ))
-
+           (rotate-waypoint-r {:x 0 :y 0 :waypoint-x 4 :waypoint-y -10} 180)))))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
