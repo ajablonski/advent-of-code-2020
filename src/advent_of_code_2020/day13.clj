@@ -45,32 +45,54 @@
 
 (defn combine-phase-rotations
   "Phase combination from https://math.stackexchange.com/a/3864593.
-  Returns a (period, offset) combination at which the combined event of A reaching its phase and B reaching its phase occurs.
+  Returns a (period, offset) for a wave function of the combined event
+  of A departing (with its offset) and B departing (with its offset)
+                         this is the point we're looking for.
+                           V
+  A:   |____|____|____|____|____|____|____| period 5, offset 0
+  B:   |______|______|______|______|______| period 7, offset 0
 
-  Bus A comes every first-period minutes, offset by first-phase
-  Bus B comes every second-period minutes, offset by second-phase (in the scenario we're searching for)
+  We can form a combined frequency of this event by representing a phase-shifted B:
 
-  The combination has period (* first-period second-period) when prime -- it will recur this often
-  The phase represents the (positive) delta from the reference point when this occurs.
+  A :  |____|____|____|____|____|____|____| period 5, offset 0
+  B':  ______|______|______|______|______|_ period 7, offset -1/+6
 
-  This gives us the frequency (period) of the combined event -
-  Bus A showing up, then Bus B showing up offset minutes later. It happens every frequency,
-  and happens at offset during that period, using the same reference point.
+  The phase shift here is -1, or +6 in mod 7\n
+
+  Adding together, and counting only when doubled up, we end up with
+
+  A+B: ____________________|_______________ period 7+5 = 35, phase shift 20
+
+  The phase shift comes from extended GCD, where s * freq_a + t * freq_b = GCD.
+  All our input is prime, so GCD is always one. s and t give one solution to
+  the number of cycles of their respective frequencies needed to achieve a phase shift of GCD.
+
+  For 5 and 7, s = 3 and t = -2
+  Phase diff here is (- 0 6) = -6
+  So we need to 'advance' by that many cycles relative to the phase of A.
+
+  We know the combined period is 35.
+  And we know we can achieve a difference of 1 every s periods of A.
+
+  So we take s = 3, A period = 5 => 15, times -6 required phase diff => -90.
+
+  Subtract from our first phase gives 0 - -90 = 90.
+
+  Translate to the modulo of our new period: 90 mod 35 = 20
+
+  So period is 35, offset (phase) by 20 from initial reference point.
   "
   [first-period first-phase second-period second-phase]
-  (let [[gcd s _] (extended-gcd first-period second-period) ; Get GCD of the two periods,
-            ; and multiple of the first required to advance the phase by gcd
-            ; (which will have a corresponding value for the second period)
-        phase-diff (- first-phase second-phase) ; Total phase difference to be overcome
-        pd-mult (quot phase-diff gcd) ; phase difference is will be overcome after pd-mult periods of the GCD
-            ; for us, this will just be phase-diff, since GCD is 1 for all combinations of primes
+  (let [[gcd s _] (extended-gcd first-period second-period)
+        phase-diff (- first-phase second-phase)
+        pd-mult (quot phase-diff gcd)
         combined-period (* second-period (quot first-period gcd))
-            ; for us, just the product of the two prime periods
-        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)
-            ; take initial phase,
-            ; subtract the difference accumulated by overcoming the phase difference,
-            ; and adjust to the new combined period
-        ]
+        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)]
+    (printf-debug "GCD: %s S: %s\n" gcd s)
+    (printf-debug "Phase diff: %s\n" phase-diff)
+    (printf-debug "Period multiplier: %s\n" pd-mult)
+    (printf-debug "Combined period: %s\n" combined-period)
+    (printf-debug "Combined phase: %s (mod %s %s)\n" combined-phase (- first-phase (* first-period s pd-mult)) combined-period)
     (list combined-period combined-phase)))
 
 (defn main-2
