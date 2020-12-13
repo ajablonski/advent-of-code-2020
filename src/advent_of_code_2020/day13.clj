@@ -44,14 +44,33 @@
           (- old-t (* quotient t)))))))
 
 (defn combine-phase-rotations
-  "Phase combination from https://math.stackexchange.com/a/3864593"
+  "Phase combination from https://math.stackexchange.com/a/3864593.
+  Returns a (period, offset) combination at which the combined event of A reaching its phase and B reaching its phase occurs.
+
+  Bus A comes every first-period minutes, offset by first-phase
+  Bus B comes every second-period minutes, offset by second-phase (in the scenario we're searching for)
+
+  The combination has period (* first-period second-period) when prime -- it will recur this often
+  The phase represents the (positive) delta from the reference point when this occurs.
+
+  This gives us the frequency (period) of the combined event -
+  Bus A showing up, then Bus B showing up offset minutes later. It happens every frequency,
+  and happens at offset during that period, using the same reference point.
+  "
   [first-period first-phase second-period second-phase]
   (let [[gcd s _] (extended-gcd first-period second-period) ; Get GCD of the two periods,
-            ; and multiple of the first to
+            ; and multiple of the first required to advance the phase by gcd
+            ; (which will have a corresponding value for the second period)
         phase-diff (- first-phase second-phase) ; Total phase difference to be overcome
         pd-mult (quot phase-diff gcd) ; phase difference is will be overcome after pd-mult periods of the GCD
-        combined-period (* second-period (quot first-period gcd)) ;
-        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)]
+            ; for us, this will just be phase-diff, since GCD is 1 for all combinations of primes
+        combined-period (* second-period (quot first-period gcd))
+            ; for us, just the product of the two prime periods
+        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)
+            ; take initial phase,
+            ; subtract the difference accumulated by overcoming the phase difference,
+            ; and adjust to the new combined period
+        ]
     (list combined-period combined-phase)))
 
 (defn main-2
