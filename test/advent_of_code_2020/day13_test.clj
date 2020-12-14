@@ -5,7 +5,7 @@
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
-    (is (= "295\n"
+    (is (= "295N\n"
            (with-out-str (with-minimal-output (main-1)))))))
 
 (deftest integration-test-main-2

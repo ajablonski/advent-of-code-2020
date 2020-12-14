@@ -5,52 +5,77 @@
 
 (def day-13-input (slurp (io/resource "day13.txt")))
 
+(defprotocol EventP
+  (get-occurrences [_])
+  (get-first-departure-on-or-after [_ time])
+  (get-description [_]))
+
+(defrecord Event [period offset name]
+  EventP
+  (get-occurrences [_]
+    (map #(+ offset (* period %)) (range)))
+  (get-first-departure-on-or-after [this time]
+    (first (filter #(>= % time) (get-occurrences this))))
+  (get-description [_]
+    (format "%s happens every %s minutes, starting at t = %s"
+            name period offset)))
+
+(defn parse-routes-with-initial-offsets
+  [routes-string offsets]
+  (map
+    (fn [[route offset]]
+      (Event.
+        (bigint route)
+        offset
+        (format
+          "Bus %s at %s"
+          route
+          (if (= offset 0) "t" (format "t + %s" offset)))))
+    (filter
+      #(not (= (first %) "x"))
+      (map list (str/split routes-string #",") offsets))))
+
 (defn main-1
   []
   (let [[min-time routes-string] (str/split-lines day-13-input)
+        routes (parse-routes-with-initial-offsets routes-string (repeat 0))
         min-time-int (Integer/parseInt min-time)
-        routes (map #(Integer/parseInt %) (filter #(not (= "x" %)) (str/split routes-string #",")))
-        route-and-earliest-time-per-route
-        (map (fn [route-num]
-               (list route-num (first (filter #(>= % min-time-int)
-                                              (map #(* % route-num) (range)))))) routes)
-        [earliest-route earliest-time] (first (sort-by second route-and-earliest-time-per-route))]
-    (println (* earliest-route (- earliest-time min-time-int)))))
+        earliest-route (apply
+                         min-key
+                         #(get-first-departure-on-or-after % min-time-int)
+                         routes)]
+    (println
+      (*
+        (:period earliest-route)
+        (- (get-first-departure-on-or-after earliest-route min-time-int)
+           min-time-int)))))
 
-(defn find-first-instance-of-combined-event
+(defn combine-events
   "Given
-    - a base event (base-name) that occurs every base-period time units, with first instance at base-offset (from 0)
-    - another event (other-name) that occurs every other-period time units, other-offset units after base event
+    - a base event (base-name) that occurs every base-period time units,
+      with first instance at base-offset (from 0)
+    - another event (other-name) that occurs every other-period time units,
+      other-offset units after base event
 
-  Returns the period, offset (from 0), and name of the combined event (base occurring and other occurring other-offset units later)"
-  [base-period base-offset base-name other-period other-offset other-name]
-  (let [base-event-occurrences (map #(+ base-offset (* base-period %)) (range))
-        combined-event-occurrences (filter
-                                     #(= 0 (mod (+ % other-offset) other-period))
-                                     base-event-occurrences)
-        combined-event-offset (first combined-event-occurrences)
-        combined-event-period (* base-period other-period)
-        combined-event-name (str base-name " followed by " other-name)]
-    (printf-info "%s happens every %s minutes, starting at %s\n" combined-event-name combined-event-period combined-event-offset)
-    (list combined-event-period combined-event-offset combined-event-name)))
+  Returns a new event reflecting the combined event
+    (base occurring and other occurring other-offset units later)"
+  [base-event other-event]
+  (let [combined-event-occurrences
+        (filter
+          #(= 0 (mod (+ % (:offset other-event)) (:period other-event)))
+          (get-occurrences base-event))
+        combined-event
+        (Event. (* (:period base-event) (:period other-event))
+                (first combined-event-occurrences)
+                (str (:name base-event) " followed by " (:name other-event)))]
+    (println-info (get-description combined-event))
+    combined-event))
 
 (defn main-2
   []
-  (let [[_ routes-string] (str/split-lines day-13-input)
-        routes (str/split routes-string #",")
-        routes-and-offsets (map
-                             (fn [[route offset]]
-                               (list
-                                 (bigint route)
-                                 offset
-                                 (str "Bus " route (if (= offset 0) (format " arriving %s minutes later" offset)))))
-                             (filter
-                               #(not (= (first %) "x"))
-                               (map list routes (range))))]
+  (let [[_ routes-string] (str/split-lines day-13-input)]
     (println
-      (second
+      (:offset
         (reduce
-          (fn [[period-a offset-a name-a] [freq-b offset-b name-b]]
-            (find-first-instance-of-combined-event period-a offset-a name-a freq-b offset-b name-b))
-          (first routes-and-offsets)
-          (rest routes-and-offsets))))))
+          combine-events
+          (parse-routes-with-initial-offsets routes-string (range)))))))
