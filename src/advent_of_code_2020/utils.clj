@@ -41,3 +41,8 @@
   [& body]
   `(binding [*debug* false
              *info* false] ~@body))
+
+(defmacro with-debug
+  [& body]
+  `(binding [*debug* true
+             *info* true] ~@body))
