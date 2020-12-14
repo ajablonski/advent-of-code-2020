@@ -96,8 +96,8 @@
 
 (defn get-manhattan-distance
   [state]
-  (+ (Math/abs (:x state))
-     (Math/abs (:y state))))
+  (+ (Math/abs ^int (:x state))
+     (Math/abs ^int (:y state))))
 
 (defn- do-main
   [instruction-map initial-state]
