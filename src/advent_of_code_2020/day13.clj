@@ -82,18 +82,20 @@
 
   So period is 35, offset (phase) by 20 from initial reference point.
   "
-  [first-period first-phase second-period second-phase]
+  [first-period first-phase first-event-name second-period second-phase second-event-name]
   (let [[gcd s _] (extended-gcd first-period second-period)
         phase-diff (- first-phase second-phase)
         pd-mult (quot phase-diff gcd)
         combined-period (* second-period (quot first-period gcd))
-        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)]
+        combined-phase (mod (- first-phase (* first-period s pd-mult)) combined-period)
+        combined-event-name (str first-event-name " followed by " second-event-name)]
     (printf-debug "GCD: %s S: %s\n" gcd s)
     (printf-debug "Phase diff: %s\n" phase-diff)
     (printf-debug "Period multiplier: %s\n" pd-mult)
     (printf-debug "Combined period: %s\n" combined-period)
     (printf-debug "Combined phase: %s (mod %s %s)\n" combined-phase (- first-phase (* first-period s pd-mult)) combined-period)
-    (list combined-period combined-phase)))
+    (printf-info "%s happens every %s minutes, starting at %s\n" combined-event-name combined-period combined-phase)
+    (list combined-period combined-phase combined-event-name)))
 
 (defn main-2
   []
@@ -101,15 +103,17 @@
         routes (str/split routes-string #",")
         routes-and-offsets (map
                              (fn [[route offset]]
-                               (list (bigint route) offset)) (filter #(not (= (first %) "x")) (map (fn [route offset] (list route offset)) routes (range))))
-        routes-times-and-offsets (map
-                                   (fn [[route offset]]
-                                     (list route
-                                      offset))
-                                   routes-and-offsets)
-        ]
-    (println (second (reduce
-      (fn [[freq-a offset-a] [freq-b offset-b]]
-        (combine-phase-rotations freq-a offset-a freq-b (mod (- offset-b) freq-b)))
-      (first routes-times-and-offsets)
-      (rest routes-times-and-offsets))))))
+                               (list
+                                 (bigint route)
+                                 offset
+                                 (str "Bus " route (if (= offset 0) (format " arriving %s minutes later" offset)))))
+                             (filter
+                               #(not (= (first %) "x"))
+                               (map list routes (range))))]
+    (println
+      (second
+        (reduce
+          (fn [[period-a offset-a name-a] [freq-b offset-b name-b]]
+            (combine-phase-rotations period-a offset-a name-a freq-b (mod (- offset-b) freq-b) name-b))
+          (first routes-and-offsets)
+          (rest routes-and-offsets))))))

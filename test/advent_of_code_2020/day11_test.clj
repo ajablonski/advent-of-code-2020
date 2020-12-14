@@ -1,6 +1,7 @@
 (ns advent-of-code-2020.day11-test
   (:require [clojure.test :refer :all]
-            [advent-of-code-2020.day11 :refer :all]))
+            [advent-of-code-2020.day11 :refer :all]
+            [advent-of-code-2020.utils :refer (with-minimal-output)]))
 
 (deftest parse-seat-grid-test
   (testing "Should parse seat grid"
