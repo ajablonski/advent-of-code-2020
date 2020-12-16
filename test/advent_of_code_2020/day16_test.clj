@@ -13,10 +13,10 @@
 row: 6-11 or 33-44
 seat: 13-40 or 45-50")))))
 
-(deftest parse-your-ticket-section-test
+(deftest parse-my-ticket-section-test
   (testing "Should parse my ticket"
-    (is (= (list 7,1,14)
-           (parse-your-ticket-section "your ticket:\n7,1,14")))))
+    (is (= (list 7, 1, 14)
+           (parse-my-ticket-section "your ticket:\n7,1,14")))))
 
 (deftest parse-other-ticket-section-test
   (testing "Should return list of tickets"
@@ -54,14 +54,12 @@ seat: 13-40 or 45-50")))))
   (testing "Should parse the separate sections"
     (with-redefs
       [parse-rules-section (fn [body] (when (= body "A") :rules-section))
-       parse-your-ticket-section (fn [body] (when (= body "B") :your-ticket-section))
+       parse-my-ticket-section (fn [body] (when (= body "B") :my-ticket-section))
        parse-other-ticket-section (fn [body] (when (= body "C") :other-ticket-section))]
       (is (= {:rules         :rules-section
-              :your-ticket   :your-ticket-section
+              :my-ticket     :my-ticket-section
               :other-tickets :other-ticket-section}
-             (parse-sections "A\n\nB\n\nC"))
-          )
-      )))
+             (parse-sections "A\n\nB\n\nC"))))))
 
 (deftest get-valid-tickets-test
   (testing "Should only return valid tickets"
@@ -84,23 +82,19 @@ seat: 13-40 or 45-50")))))
                #{class-rule}
                #{seat-rule}
                )
-             (get-possible-rules '(7 3 47) (list class-rule
-                                                 row-rule
-                                                 seat-rule)))))))
+             (get-possible-rules-per-ticket-index '(7 3 47) (list class-rule
+                                                                  row-rule
+                                                                  seat-rule)))))))
 
 (deftest assign-fields-to-ticket-test
-  (let [class-rule (Rule. "class" [1 3] [5 7])
-        row-rule (Rule. "row" [6 11] [33 44])
-        seat-rule (Rule. "seat" [13 40] [45 50])]
   (testing "Should assign fields to a ticket based on known indices of rules"
     (is (= {"class" 1
-            "row" 7
-            "seat" 14}
+            "row"   7
+            "seat"  14}
            (assign-fields-to-ticket '(7 1 14)
-                                    {0 row-rule
-                                    1 class-rule
-                                    2 seat-rule})
-           )))))
+                                    {0 "row"
+                                     1 "class"
+                                     2 "seat"})))))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
