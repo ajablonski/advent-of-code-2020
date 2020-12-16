@@ -65,8 +65,10 @@
 
 (defn main-1
   []
-  (let [parsed-data (parse-sections day-16-input)]
-    (println (apply + (get-invalid-fields-for-tickets (:other-tickets parsed-data) (:rules parsed-data))))))
+  (let [{other-tickets :other-tickets rules :rules} (parse-sections day-16-input)]
+    (->> (get-invalid-fields-for-tickets other-tickets rules)
+         (apply +)
+         (println))))
 
 (defn ticket-valid?
   [ticket rules]
