@@ -19,39 +19,35 @@
                   (.toCharArray row)))
               (str/split-lines state-string)))))
 
+(defn get-xyz-ranges
+  [[min-x max-x] [min-y max-y] [min-z max-z]]
+  (mapcat
+       (fn [x]
+         (mapcat
+           (fn [y]
+             (map
+               (fn [z] [x y z])
+               (range min-z (inc max-z))))
+           (range min-y (inc max-y))))
+       (range min-x (inc max-x))))
+
 (defn expand-state
   [state]
-  (let [min-x (apply min (keys state))
-        max-x (apply max (keys state))
-        min-y (apply min (keys (get state 0)))
-        max-y (apply max (keys (get state 0)))
-        min-z (apply min (keys (get-in state [0 0])))
-        max-z (apply max (keys (get-in state [0 0])))]
+  (let [min-x (- (apply min (keys state)) 1)
+        max-x (+ (apply max (keys state)) 1)
+        min-y (- (apply min (keys (get state 0))) 1)
+        max-y (+ (apply max (keys (get state 0))) 1)
+        min-z (- (apply min (keys (get-in state [0 0]))) 1)
+        max-z (+ (apply max (keys (get-in state [0 0]))) 1)]
     (reduce
       (fn [new-state coordinates] (update-in new-state coordinates (fn [curr-val] (if (nil? curr-val) \. curr-val))))
       state
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (map
-                (fn [z] [x y z])
-                (range (- min-z 1) (+ max-z 2))))
-            (range (- min-y 1) (+ max-y 2))))
-        (range (- min-x 1) (+ max-x 2))))))
+      (get-xyz-ranges [min-x max-x] [min-y max-y] [min-z max-z]))))
 
 (defn get-neighbor-coordinates
   [[x y z :as original-coordinates]]
   (filter #(not (= % original-coordinates))
-          (mapcat
-            (fn [x]
-              (mapcat
-                (fn [y]
-                  (map
-                    (fn [z] [x y z])
-                    (range (- z 1) (+ z 2))))
-                (range (- y 1) (+ y 2))))
-            (range (- x 1) (+ x 2)))))
+          (get-xyz-ranges [(- x 1) (+ x 1)] [(- y 1) (+ y 1)] [(- z 1) (+ z 1)])))
 
 (defn print-grid
   [state]
@@ -95,15 +91,7 @@
                            (cond (= \# curr-val) (if (<= 2 active-neighbors 3) \# \.)
                                  (= \. curr-val) (if (= 3 active-neighbors) \# \.))))))
       state
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (map
-                (fn [z] [x y z])
-                (range min-z (inc max-z))))
-            (range min-y (inc max-y))))
-        (range min-x (inc max-x))))))
+      (get-xyz-ranges [min-x max-x] [min-y max-y] [min-z max-z]))))
 
 (defn step
   [state]
@@ -121,15 +109,7 @@
       (fn [total-occupied coordinates]
         (+ total-occupied (if (= \# (get-in state coordinates)) 1 0)))
       0
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (map
-                (fn [z] [x y z])
-                (range min-z (inc max-z))))
-            (range min-y (inc max-y))))
-        (range min-x (inc max-x))))))
+      (get-xyz-ranges [min-x max-x] [min-y max-y] [min-z max-z]))))
 
 (defn main-1
   []
@@ -141,7 +121,6 @@
                                   step
                                   step
                                   step)))))
-
 
 (defn parse-initial-state-with-w
   [state-string]
@@ -157,47 +136,40 @@
                   (.toCharArray row)))
               (str/split-lines state-string)))))
 
+(defn get-xyzw-ranges
+  [[min-x max-x] [min-y max-y] [min-z max-z] [min-w max-w]]
+  (mapcat
+    (fn [x]
+      (mapcat
+        (fn [y]
+          (mapcat
+            (fn [z]
+              (map
+                (fn [w] [x y z w])
+                (range min-w (inc max-w))))
+            (range min-z (inc max-z))))
+        (range min-y (inc max-y))))
+    (range min-x (inc max-x))))
+
 (defn expand-state-with-w
   [state]
-  (let [min-x (apply min (keys state))
-        max-x (apply max (keys state))
-        min-y (apply min (keys (get state 0)))
-        max-y (apply max (keys (get state 0)))
-        min-z (apply min (keys (get-in state [0 0])))
-        max-z (apply max (keys (get-in state [0 0])))
-        min-w (apply min (keys (get-in state [0 0 0])))
-        max-w (apply max (keys (get-in state [0 0 0])))]
+  (let [min-x (- (apply min (keys state)) 1)
+        max-x (+ (apply max (keys state)) 1)
+        min-y (- (apply min (keys (get state 0))) 1)
+        max-y (+ (apply max (keys (get state 0))) 1)
+        min-z (- (apply min (keys (get-in state [0 0]))) 1)
+        max-z (+ (apply max (keys (get-in state [0 0]))) 1)
+        min-w (- (apply min (keys (get-in state [0 0 0]))) 1)
+        max-w (+ (apply max (keys (get-in state [0 0 0]))) 1)]
     (reduce
       (fn [new-state coordinates] (update-in new-state coordinates (fn [curr-val] (if (nil? curr-val) \. curr-val))))
       state
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (mapcat
-                (fn [z]
-                  (map
-                    (fn [w] [x y z w])
-                    (range (- min-w 1) (+ max-w 2))))
-                (range (- min-z 1) (+ max-z 2))))
-            (range (- min-y 1) (+ max-y 2))))
-        (range (- min-x 1) (+ max-x 2))))))
+      (get-xyzw-ranges [min-x max-x] [min-y max-y] [min-z max-z] [min-w max-w]))))
 
 (defn get-neighbor-coordinates-with-w
   [[x y z w :as original-coordinates]]
   (filter #(not (= % original-coordinates))
-          (mapcat
-            (fn [x]
-              (mapcat
-                (fn [y]
-                  (mapcat
-                    (fn [z]
-                      (map
-                        (fn [w] [x y z w])
-                        (range (- w 1) (+ w 2))))
-                    (range (- z 1) (+ z 2))))
-                (range (- y 1) (+ y 2))))
-            (range (- x 1) (+ x 2)))))
+          (get-xyzw-ranges [(- x 1) (+ x 1)] [(- y 1) (+ y 1)] [(- z 1) (+ z 1)] [(- w 1) (+ w 1)])))
 
 
 (defn update-state-w
@@ -219,19 +191,7 @@
                            (cond (= \# curr-val) (if (<= 2 active-neighbors 3) \# \.)
                                  (= \. curr-val) (if (= 3 active-neighbors) \# \.))))))
       state
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (mapcat
-                (fn [z]
-                  (map
-                    (fn [w]
-                      [x y z w])
-                    (range min-w (inc max-w))))
-                (range min-z (inc max-z))))
-            (range min-y (inc max-y))))
-        (range min-x (inc max-x))))))
+      (get-xyzw-ranges [min-x max-x] [min-y max-y] [min-z max-z] [min-w max-w]))))
 
 (defn count-occupied-w
   [state]
@@ -248,18 +208,7 @@
       (fn [total-occupied coordinates]
         (+ total-occupied (if (= \# (get-in state coordinates)) 1 0)))
       0
-      (mapcat
-        (fn [x]
-          (mapcat
-            (fn [y]
-              (mapcat
-                (fn [z]
-                  (map
-                    (fn [w] [x y z w])
-                    (range min-w (inc max-w))))
-                (range min-z (inc max-z))))
-            (range min-y (inc max-y))))
-        (range min-x (inc max-x))))))
+      (get-xyzw-ranges [min-x max-x] [min-y max-y] [min-z max-z] [min-w max-w]))))
 
 (defn step-w
   [state]
