@@ -10,28 +10,30 @@
   (rotate-cc [_] "Rotate counterclockwise")
   (flip-y [_] "Flip across y axis")
   (match-or-nil [_ other] "Get match with another tile in terms of an x-y delta, or nil if no match")
-  (print-debug [_] "Print a debugging version of the tile (borders only)"))
+  (print-debug [_] "Print a debugging version of the tile"))
 
-(defrecord Tile [id borders coordinates] TileP
-  (rotate-cc [_] (->Tile id (concat (rest borders) (list (first borders))) nil))
-  (flip-y [_] (let [[old-b0 old-b1 old-b2 old-b3] borders]
-                (->Tile id (map str/reverse (list old-b0 old-b3 old-b2 old-b1)) nil)))
+(defrecord Tile [id lines coordinates] TileP
+  (rotate-cc [_]
+    (let [new-lines (map
+                      (fn [col-num] (apply str (map (fn [line] (get line col-num)) lines)))
+                      (range (dec (count (first lines))) -1 -1))]
+      (->Tile id new-lines nil)))
+  (flip-y [_] (let [new-lines (map str/reverse lines)]
+                (->Tile id new-lines nil)))
   (match-or-nil [_ other]
-    (let [[this-b0 this-b1 this-b2 this-b3] borders
-          [other-b0 other-b1 other-b2 other-b3] (:borders other)]
-      (cond (= this-b0 (str/reverse other-b2)) '(0 1)
-            (= this-b1 (str/reverse other-b3)) '(1 0)
-            (= this-b2 (str/reverse other-b0)) '(0 -1)
-            (= this-b3 (str/reverse other-b1)) '(-1 0))))
+    (let [other-lines (:lines other)
+          left-edge (apply str (map first lines))
+          other-left-edge (apply str (map first other-lines))
+          right-edge (apply str (map last lines))
+          other-right-edge (apply str (map last other-lines))]
+      (cond (= (first lines) (last other-lines)) '(0 1)
+            (= right-edge other-left-edge) '(1 0)
+            (= (last lines) (first other-lines)) '(0 -1)
+            (= left-edge other-right-edge) '(-1 0))))
   (print-debug [_]
-    (let [[top right bottom left] borders
-          left-side (subvec (vec (str/reverse left)) 1 (- (count left) 1))
-          right-side (subvec (vec right) 1 (- (count left) 1))]
-      (println-info "ID:" id)
-      (println-info "x,y:" coordinates)
-      (println-info top)
-      (doall (map (fn [l r] (printf-info "%s        %s\n" l r)) left-side right-side))
-      (println-info (str/reverse bottom)))))
+    (println-info "ID:" id)
+    (println-info "x,y:" coordinates)
+    (doall (map (println-info) lines))))
 
 (defn try-place-tile
   [start-tile other-tile]
@@ -52,12 +54,8 @@
 (defn parse-tile
   [tile-string]
   (let [[header & lines] (str/split-lines tile-string)
-        [_ tile-id] (re-matches #"Tile (\d+):" header)
-        border-0 (first lines)
-        border-1 (apply str (map last lines))
-        border-2 (str/reverse (last lines))
-        border-3 (apply str (reverse (map first lines)))]
-    (->Tile (Integer/parseInt tile-id) (list border-0 border-1 border-2 border-3) nil)))
+        [_ tile-id] (re-matches #"Tile (\d+):" header)]
+    (->Tile (Integer/parseInt tile-id) lines nil)))
 
 (defn parse-tiles
   [tiles-string]

@@ -42,7 +42,7 @@
 
 (deftest parse-tile-test
   (testing "Should parse tile input"
-    (is (= (->Tile 2311 '("..##.#..#." "...#.##..#" "###..###.." ".#..#####.") nil)
+    (is (= (->Tile 2311 '("..##.#..#." "##..#....." "#...##..#." "####.#...#" "##.##.###." "##...#.###" ".#.#.#..##" "..#....#.." "###...#.#." "..###..###") nil)
            (parse-tile "Tile 2311:
 ..##.#..#.
 ##..#.....
@@ -57,44 +57,86 @@
 
 
 (deftest Tile-test
-  (testing "should rotate"
-    (let [initial-tile (->Tile 2311 '("..##.#..#." "...#.##..#" "###..###.." ".#..#####.") nil)
-          rotate-90 (rotate-cc initial-tile)
-          rotate-180 (rotate-cc rotate-90)
-          rotate-270 (rotate-cc rotate-180)
-          rotate-360 (rotate-cc rotate-270)]
-      (is (= initial-tile rotate-360))
-      (is (= rotate-90 (->Tile 2311 '("...#.##..#" "###..###.." ".#..#####." "..##.#..#.") nil)))
-      (is (= rotate-180 (->Tile 2311 '("###..###.." ".#..#####." "..##.#..#." "...#.##..#") nil)))
-      (is (= rotate-270 (->Tile 2311 '(".#..#####." "..##.#..#." "...#.##..#" "###..###..") nil)))))
-  (testing "should flip on y axis"
-    (let [initial-tile (->Tile 2311 '("..##.#..#." "...#.##..#" "###..###.." ".#..#####.") nil)
-          flip-once (flip-y initial-tile)
-          flip-twice (flip-y flip-once)]
-      (is (= flip-twice initial-tile)
-          (= flip-once (->Tile 2311 '(".#..#.##.." ".#####..#." "..###..###" "#..##.#...") nil)))))
-  (testing "should match with another tile"
-    (let [initial-tile (->Tile 1427 '("..##.#..#." ".#.#.###.." "..#.##.###" "#..#......") nil)
-          left-tile (->Tile 2729 '("#.##...##." "......#..#" "#.#.#.#..." ".#....####") nil)
-          right-tile (->Tile 2473 '("..#.###..." ".####....#" "####...##." "..###.#.#.") nil)
-          bottom-tile (->Tile 1489 '("###.##.#.." ".#..#....." "....#.#.##" "#...##.#.#") nil)
-          top-tile (->Tile 2311 '("..###..###" "#..##.#..." ".#..#.##.." ".#####..#.") nil)]
-      (is (= (match-or-nil initial-tile left-tile)
-             '(-1 0)))
-      (is (= (match-or-nil initial-tile right-tile)
-             '(1 0)))
-      (is (= (match-or-nil initial-tile bottom-tile)
-             '(0 -1)))
-      (is (= (match-or-nil initial-tile top-tile)
-             '(0 1)))
-      (is (nil? (match-or-nil initial-tile initial-tile))))))
+  (let [initial-tile (parse-tile "Tile 2311:
+..##.#..#.
+##..#.....
+#...##..#.
+####.#...#
+##.##.###.
+##...#.###
+.#.#.#..##
+..#....#..
+###...#.#.
+..###..###")]
+    (testing "should rotate"
+      (let [rotate-90 (rotate-cc initial-tile)
+            rotate-180 (rotate-cc rotate-90)
+            rotate-270 (rotate-cc rotate-180)
+            rotate-360 (rotate-cc rotate-270)]
+        (is (= initial-tile rotate-360))
+        (is (= rotate-90 (->Tile 2311 '("...#.##..#" "#.#.###.##" "....##.#.#" "....#...#." "#.##.##..." ".##.#....#" "#..##.#..#" "#..#...###" ".#.####.#." ".#####..#.") nil)))
+        (is (= rotate-180 (->Tile 2311 '("###..###.." ".#.#...###" "..#....#.." "##..#.#.#." "###.#...##" ".###.##.##" "#...#.####" ".#..##...#" ".....#..##" ".#..#.##..") nil)))
+        (is (= rotate-270 (->Tile 2311 '(".#..#####." ".#.####.#." "###...#..#" "#..#.##..#" "#....#.##." "...##.##.#" ".#...#...." "#.#.##...." "##.###.#.#" "#..##.#...") nil)))))
+    (testing "should flip on y axis"
+      (let [flip-once (flip-y initial-tile)
+            flip-twice (flip-y flip-once)]
+        (is (= flip-twice initial-tile)
+            (= flip-once (->Tile 2311 nil nil)))))
+    (testing "should match with another tile"
+      (let [initial-tile (->Tile 1427 '("..##.#..#." "..#..###.#" ".#.####.#." "...#.#####" "...##..##." "....#...##" "#.#.#.##.#" ".#.##.#..#" ".#..#.##.." "###.##.#..") nil)
+            left-tile (->Tile 2729 '("#.##...##." "##..#.##.." "##.####..." "####.#.#.." ".#.####..." ".##..##.#." "....#..#.#" "..#.#....." "####.#...." "...#.#.#.#") nil)
+            right-tile (->Tile 2473 '("..#.###..." "##.##....#" "..#.###..#" "###.#..###" ".######.##" "#.#.#.#..." "#.###.###." "#.###.##.." ".######..." ".##...####") nil)
+            bottom-tile (->Tile 1489 '("###.##.#.." "..##.##.##" "##.#...##." "...#.#.#.." "#..#.#.#.#" "#####...#." "..#...#..." ".##..##..." "..##...#.." "##.#.#....") nil)
+            top-tile (->Tile 2311 '("..###..###" "###...#.#." "..#....#.." ".#.#.#..##" "##...#.###" "##.##.###." "####.#...#" "#...##..#." "##..#....." "..##.#..#.") nil)]
+        (is (= (match-or-nil initial-tile left-tile)
+               '(-1 0)))
+        (is (= (match-or-nil initial-tile right-tile)
+               '(1 0)))
+        (is (= (match-or-nil initial-tile bottom-tile)
+               '(0 -1)))
+        (is (= (match-or-nil initial-tile top-tile)
+               '(0 1)))
+        (is (nil? (match-or-nil initial-tile initial-tile)))))))
+
+;           ..###..###
+;           ###...#.#.
+;           ..#....#..
+;           .#.#.#..##
+;           ##...#.###
+;           ##.##.###.
+;           ####.#...#
+;           #...##..#.
+;           ##..#.....
+;           ..##.#..#.
+
+;#.##...##. ..##.#..#. ..#.###...
+;##..#.##.. ..#..###.# ##.##....#
+;##.####... .#.####.#. ..#.###..#
+;####.#.#.. ...#.##### ###.#..###
+;.#.####... ...##..##. .######.##
+;.##..##.#. ....#...## #.#.#.#...
+;....#..#.# #.#.#.##.# #.###.###.
+;..#.#..... .#.##.#..# #.###.##..
+;####.#.... .#..#.##.. .######...
+;...#.#.#.# ###.##.#.. .##...####
+
+;           ###.##.#..
+;           ..##.##.##
+;           ##.#...##.
+;           ...#.#.#..
+;           #..#.#.#.#
+;           #####...#.
+;           ..#...#...
+;           .##..##...
+;           ..##...#..
+;           ##.#.#....
 
 (deftest try-tile-possibilities-test
   (testing "Should try to place other tile with respect to first tile"
     (let [tiles (parse-tiles day-20-input)
           center-tile (assoc (rotate-cc (rotate-cc (flip-y (nth tiles 3)))) :coordinates '(0 0))]
       (is (= (try-place-tile center-tile (first tiles))
-             (->Tile 2311 '("..###..###" "#..##.#..." ".#..#.##.." ".#####..#.") '(0 1)))))))
+             (->Tile 2311 '("..###..###" "###...#.#." "..#....#.." ".#.#.#..##" "##...#.###" "##.##.###." "####.#...#" "#...##..#." "##..#....." "..##.#..#.") '(0 1)))))))
 
 (deftest integration-test-main-1
   (testing "Integration test part 1"
