@@ -9,7 +9,8 @@
 (defn parse-food
   [food-string]
   (let [[_ food-part allergen-part] (re-matches #"(.*) \(contains (.*)\)" food-string)]
-    {:ingredients (set (str/split food-part #" ")) :allergens (set (str/split allergen-part #", "))}))
+    {:ingredients (set (str/split food-part #" "))
+     :allergens   (set (str/split allergen-part #", "))}))
 
 (defn parse-foods
   [foods-string]
@@ -47,29 +48,39 @@
   []
   (let [food-list (parse-foods day-21-input)
         allergen-free-ingredients (get-allergen-free-ingredients food-list)]
-    (println (apply + (map #(count-ingredient-appearances % allergen-free-ingredients) food-list)))))
+    (println
+      (apply
+        +
+        (map
+          #(count-ingredient-appearances % allergen-free-ingredients)
+          food-list)))))
+
+(defn get-allergen-causing-ingredients
+  [food-list]
+  (loop [allergen-ingredient-map (sorted-map)
+         to-process (map
+                      #(list
+                         %
+                         (get-possible-culprits-for-allergen
+                           %
+                           food-list))
+                      (get-all-allergens food-list))]
+    (println-info "End map" allergen-ingredient-map
+                  "To process" to-process)
+    (if (empty? to-process)
+      allergen-ingredient-map
+      (let [[[a is] & rest] (sort-by #(count (second %)) to-process)
+            ingredient (first is)]
+        (recur
+          (assoc allergen-ingredient-map a ingredient)
+          (map (fn [[a is]] (list a (disj is ingredient))) rest))))))
 
 (defn main-2
   []
-  (let [food-list (parse-foods day-21-input)
-        allergen-free-ingredients (get-allergen-free-ingredients food-list)
-        allergens (get-all-allergens food-list)
-        foods-with-only-allergen-ingredients (map #(update % :ingredients (fn [old-ingredients] (set/difference old-ingredients allergen-free-ingredients))) food-list)
-        allergens-and-ingredients (map (fn [allergen] (list allergen (get-possible-culprits-for-allergen allergen foods-with-only-allergen-ingredients))) allergens)
-        allergen-ingredient-map (loop
-                [end-map (sorted-map)
-                 known-ingredients #{}
-                 to-process allergens-and-ingredients
-                 ]
-                (println-info "End map" end-map "known ingredients" known-ingredients "to process" to-process)
-                (if (empty? to-process)
-                  end-map
-                  (let [[[a is] & rest] (sort-by #(count (second %)) to-process)
-                        ingredient (first is)]
-                    (recur
-                      (assoc end-map a ingredient)
-                      (conj known-ingredients ingredient)
-                      (map (fn [[a is]] (list a (disj is ingredient))) rest))
-                    )))]
-    (println (str/join "," (map second allergen-ingredient-map)))))
-      
+  (->>
+    day-21-input
+    parse-foods
+    get-allergen-causing-ingredients
+    (map second)
+    (str/join ",")
+    println))
