@@ -6,13 +6,15 @@
 
 (def day-20-input (slurp (io/resource "day20.txt")))
 
+(def sea-monster-width 20)
+
 (defprotocol TileP
   (rotate-cc [_] "Rotate counterclockwise")
   (flip-y [_] "Flip across y axis")
   (match-or-nil [_ other] "Get match with another tile in terms of an x-y delta, or nil if no match")
   (strip-border [_] "Remove the border from the tile")
-  (print-debug [_] "Print a debugging version of the tile")
-  (combine-tile [_ other] "Combine with a tile to the right"))
+  (combine-tile [_ other] "Combine with a tile to the right")
+  (print-debug [_] "Print a debugging version of the tile"))
 
 (defrecord Tile [id lines coordinates] TileP
   (rotate-cc [_]
@@ -110,38 +112,13 @@
         (fn [t] (second (:coordinates t)))
         tile-set))))
 
-(defn find-all-indexes
-  [substring whole-string]
-  (loop [start-index 0
-         matches-so-far '()]
-    (let [match (str/index-of whole-string substring start-index)]
-      (if (nil? match) (reverse matches-so-far) (recur (inc match) (cons match matches-so-far))))))
-
-(defn- head-matches?
-  [tile [head-row head-col]]
-  (let [row (nth (:lines tile) head-row)
-        does-head-match (= (nth row head-col) \#)]
-    (when (not does-head-match) (println-info "Ignoring" head-row head-col "as head does not match"))
-    does-head-match))
-
-(defn- base-matches?
-  [tile [base-row base-start-col]]
-  (let [row (nth (:lines tile) base-row)]
-    (some? (re-matches #"#..#..#..#..#..#" (subs row base-start-col (+ base-start-col 16))))))
-
 (defn count-monsters
   "Returns the total count of sea monsters pairs containing sea monsters"
   [tile]
-  (let [body-matches (apply concat
-                            (map-indexed
-                              (fn [row-num line] (mapcat (fn [match] (map #(list (inc row-num) %) (find-all-indexes match line))) (re-seq #"#....##....##....###" line)))
-                              (rest (:lines tile))))
-        total-matches (filter (fn [[row-match col-match]]
-                                (and (head-matches? tile [(dec row-match) (+ col-match 18)])
-                                     (base-matches? tile [(inc row-match) (+ col-match 1)])))
-                              body-matches)]
-    (println-info "Found matches with body starting at " total-matches)
-    (count total-matches)))
+  (let [line-length (count (first (:lines tile)))
+        monster-regex (re-pattern (format "(?=(.{18}#.(?:.|\\n){%s}#....##....##....###(?:.|\\n){%s}.#..#..#..#..#..#))" (- line-length sea-monster-width) (- line-length sea-monster-width)))
+        regex-matches (re-seq monster-regex (str/join (:lines tile)))]
+    (count regex-matches)))
 
 (defn has-sea-monster?
   [tile]
