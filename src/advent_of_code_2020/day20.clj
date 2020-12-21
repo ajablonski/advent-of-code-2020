@@ -110,6 +110,58 @@
         (fn [t] (second (:coordinates t)))
         tile-set))))
 
+(defn find-all-indexes
+  [substring whole-string]
+  (loop [start-index 0
+         matches-so-far '()]
+    (let [match (str/index-of whole-string substring start-index)]
+      (if (nil? match) (reverse matches-so-far) (recur (inc match) (cons match matches-so-far))))))
+
+(defn- head-matches?
+  [tile [head-row head-col]]
+  (let [row (nth (:lines tile) head-row)
+        does-head-match (= (nth row head-col) \#)]
+    (when (not does-head-match) (println-info "Ignoring" head-row head-col "as head does not match"))
+    does-head-match))
+
+(defn- base-matches?
+  [tile [base-row base-start-col]]
+  (let [row (nth (:lines tile) base-row)]
+    (some? (re-matches #"#..#..#..#..#..#" (subs row base-start-col (+ base-start-col 16))))))
+
+(defn count-monsters
+  "Returns the total count of sea monsters pairs containing sea monsters"
+  [tile]
+  (let [body-matches (apply concat
+                            (map-indexed
+                              (fn [row-num line] (mapcat (fn [match] (map #(list (inc row-num) %) (find-all-indexes match line))) (re-seq #"#....##....##....###" line)))
+                              (rest (:lines tile))))
+        total-matches (filter (fn [[row-match col-match]]
+                                (and (head-matches? tile [(dec row-match) (+ col-match 18)])
+                                     (base-matches? tile [(inc row-match) (+ col-match 1)])))
+                              body-matches)]
+    (println-info "Found matches with body starting at " total-matches)
+    (count total-matches)))
+
+(defn has-sea-monster?
+  [tile]
+  (not (= 0 (count-monsters tile))))
+
+(defn find-orientation-with-monster
+  [large-tile]
+  (let [possibilities (list large-tile
+                            (rotate-cc large-tile)
+                            (-> large-tile rotate-cc rotate-cc)
+                            (-> large-tile rotate-cc rotate-cc rotate-cc)
+                            (flip-y large-tile)
+                            (-> large-tile flip-y rotate-cc)
+                            (-> large-tile flip-y rotate-cc rotate-cc)
+                            (-> large-tile flip-y rotate-cc rotate-cc rotate-cc))
+        orientations-with-monsters (filter has-sea-monster? possibilities)
+        tile-orientation-with-monster (first orientations-with-monsters)]
+    (when (> (count orientations-with-monsters) 1) (println "ERROR: More configurations found with monsters than expected"))
+    tile-orientation-with-monster))
+
 (defn join-tiles
   [tiles-with-coordinates]
   (let [tile-map (arrange-and-strip-tiles tiles-with-coordinates)
@@ -134,10 +186,17 @@
                   sorted)]
     (println (apply * (map :id corners)))))
 
+(defn get-sea-choppiness
+  [tiles]
+  (let [sorted (find-tile-positions tiles)
+        large-tile (join-tiles sorted)
+        correct-orientation (-> large-tile find-orientation-with-monster)
+        monster-count (count-monsters correct-orientation)
+        total-#s (apply + (map (fn [row] (count (filter #(= % \#) row))) (:lines correct-orientation)))]
+    (- total-#s (* monster-count 15))))
+
 (defn main-2
   []
-  (let [sorted (find-tile-positions (parse-tiles day-20-input))
-        large-tile (join-tiles sorted)]
-    (print-debug (-> large-tile rotate-cc rotate-cc flip-y))))
+  (println (get-sea-choppiness (parse-tiles day-20-input))))
 
       
