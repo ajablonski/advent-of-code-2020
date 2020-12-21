@@ -10,7 +10,9 @@
   (rotate-cc [_] "Rotate counterclockwise")
   (flip-y [_] "Flip across y axis")
   (match-or-nil [_ other] "Get match with another tile in terms of an x-y delta, or nil if no match")
-  (print-debug [_] "Print a debugging version of the tile"))
+  (strip-border [_] "Remove the border from the tile")
+  (print-debug [_] "Print a debugging version of the tile")
+  (combine-tile [_ other] "Combine with a tile to the right"))
 
 (defrecord Tile [id lines coordinates] TileP
   (rotate-cc [_]
@@ -30,10 +32,19 @@
             (= right-edge other-left-edge) '(1 0)
             (= (last lines) (first other-lines)) '(0 -1)
             (= left-edge other-right-edge) '(-1 0))))
+  (strip-border [_]
+    (->Tile id
+            (map (fn [row] (let [row-vector (vec row)]
+                             (apply str (subvec row-vector 1 (dec (count row-vector))))))
+                 (subvec (vec lines) 1 (dec (count lines))))
+            coordinates))
+  (combine-tile [_ other]
+    (let [other-lines (:lines other)]
+      (->Tile id (map str lines other-lines) (list nil (second coordinates)))))
   (print-debug [_]
     (println-info "ID:" id)
     (println-info "x,y:" coordinates)
-    (doall (map (println-info) lines))))
+    (doall (map #(println-info %) lines))))
 
 (defn try-place-tile
   [start-tile other-tile]
@@ -72,7 +83,7 @@
     (list #{} unplaced-tile-set)
     active-tile-set))
 
-(defn do-main
+(defn find-tile-positions
   [tiles]
   (loop
     [set-tiles #{}
@@ -83,9 +94,33 @@
       (let [[new-active new-unset] (pass-through active-set unset-set)]
         (recur (set/union set-tiles active-set) new-active new-unset)))))
 
+(defn arrange-and-strip-tiles
+  "Arranges tiles into a map of a map of row id to map of column id to tile"
+  [tile-set]
+  (apply
+    sorted-map
+    (mapcat
+      (fn [[k tiles]]
+        (list k
+              (apply sorted-map
+                     (mapcat
+                       (fn [[k ts]] (list k (strip-border (first ts))))
+                       (group-by (fn [t] (first (:coordinates t))) tiles)))))
+      (group-by
+        (fn [t] (second (:coordinates t)))
+        tile-set))))
+
+(defn join-tiles
+  [tiles-with-coordinates]
+  (let [tile-map (arrange-and-strip-tiles tiles-with-coordinates)
+        tile-rows (map
+                    (fn [[_ tiles-by-cols]] (reduce (fn [combined-tile tile] (combine-tile combined-tile tile)) (map second tiles-by-cols)))
+                    (reverse tile-map))]
+    (->Tile 0 (mapcat :lines tile-rows) '(0 0))))
+
 (defn main-1
   []
-  (let [sorted (do-main (parse-tiles day-20-input))
+  (let [sorted (find-tile-positions (parse-tiles day-20-input))
         min-x (apply min (map (fn [t] (first (:coordinates t))) sorted))
         max-x (apply max (map (fn [t] (first (:coordinates t))) sorted))
         min-y (apply min (map (fn [t] (second (:coordinates t))) sorted))
@@ -101,6 +136,8 @@
 
 (defn main-2
   []
-  (println day-20-input))
+  (let [sorted (find-tile-positions (parse-tiles day-20-input))
+        large-tile (join-tiles sorted)]
+    (print-debug (-> large-tile rotate-cc rotate-cc flip-y))))
 
       
