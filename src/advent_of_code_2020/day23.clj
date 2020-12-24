@@ -9,6 +9,13 @@
   [input]
   (vec (map #(Integer/parseInt %) (str/split input #""))))
 
+(defn convert-vector-to-maps
+  [input-vector]
+  (let [index-to-vals (apply hash-map (mapcat (fn [i v] (list i {:val v :next (mod (inc i) (count input-vector))})) (range) input-vector))]
+    (list
+      index-to-vals
+      (apply hash-map (mapcat (fn [[i {val :val}]] (list val i)) index-to-vals)))))
+
 (defn get-next-cup-to-try
   [cup max-cup]
   (let [ret (mod (- cup 1) max-cup)]
@@ -23,68 +30,68 @@
         (recur (get-next-cup-to-try cup-to-try max-cup))
         cup-to-try))))
 
-(defn move-items
-  [cup-vec curr-index dest-cup array-size]
-  (let [orig-value-1 (get cup-vec (mod (+ curr-index 1) array-size))
-        orig-value-2 (get cup-vec (mod (+ curr-index 2) array-size))
-        orig-value-3 (get cup-vec (mod (+ curr-index 3) array-size))]
-    (reduce
-      (fn [cup-vec i]
-        (let [index (mod i array-size)
-              from-index (mod (+ i 3) array-size)
-              curr-val (get cup-vec from-index)
-              new-vec (assoc! cup-vec index curr-val)]
-          (if (= curr-val dest-cup)
-            (reduced
-              (assoc! new-vec
-                      (mod (+ index 1) array-size)
-                      orig-value-1
-                      (mod (+ index 2) array-size)
-                      orig-value-2
-                      (mod (+ index 3) array-size)
-                      orig-value-3))
-            new-vec)))
-      cup-vec
-      (range (inc curr-index) ##Inf))))
-
-(defn move
-  [cups curr-index cup-count]
-  (let [curr-cup (get cups curr-index)
-        next-cup-indices (map #(mod (+ % curr-index) cup-count) '(1 2 3))
-        next-cups (map #(get cups %) next-cup-indices)
-        dest-cup (get-destination-cup curr-cup next-cups cup-count)]
-    (move-items cups curr-index dest-cup cup-count)))
+(defn move-with-map
+  [cup-map cup-lookup-map curr-index]
+  (let [this-cup (get cup-map curr-index)
+        next-cup-1-index (:next this-cup)
+        next-cup-2-index (:next (get cup-map next-cup-1-index))
+        next-cup-3-index (:next (get cup-map next-cup-2-index))
+        after-removed-index (:next (get cup-map next-cup-3-index))
+        dest-cup-val (get-destination-cup
+                       (:val this-cup)
+                       (map #(:val
+                               (get cup-map %))
+                            (list next-cup-1-index next-cup-2-index next-cup-3-index))
+                       (count cup-map))
+        dest-cup-index (get cup-lookup-map dest-cup-val)
+        dest-cup (get cup-map dest-cup-index)
+        dest-cup-old-next (:next dest-cup)
+        new-map (assoc
+                  cup-map
+                  curr-index (assoc this-cup :next after-removed-index)
+                  dest-cup-index (assoc dest-cup :next next-cup-1-index)
+                  next-cup-3-index (assoc (get cup-map next-cup-3-index) :next dest-cup-old-next)
+                  )]
+    (list new-map after-removed-index)))
 
 (defn play-turns
   [cups n-turns]
-  (let [cup-count (count cups)]
+  (let [[cup-map cup-lookup-map] (convert-vector-to-maps cups)]
     (loop
-      [cups (transient cups)
+      [cup-map cup-map
        turns-left n-turns
        curr-index 0]
-      (when (zero? (mod turns-left 10)) (println-info "Turns left" turns-left))
+      (when (zero? (mod turns-left 10000)) (println-info "Turns left" turns-left))
       (if (= turns-left 0)
-        (persistent! cups)
-        (recur (move cups curr-index cup-count) (dec turns-left) (mod (inc curr-index) cup-count))))))
+        (list cup-map cup-lookup-map)
+        (let [[new-map new-index] (move-with-map cup-map cup-lookup-map curr-index)]
+          (recur new-map
+                 (dec turns-left)
+                 new-index))))))
 
-(defn wrap-to-1
-  [cups]
-  (if (= (first cups) 1)
-    (rest cups)
-    (recur (concat (rest cups) (list (first cups))))))
+(defn to-seq
+  [cup-map val-map]
+  (loop
+    [curr-index (get val-map 1)
+     visited #{}
+     result '()]
+    (if (contains? visited curr-index)
+      (reverse result)
+      (let [cup (get cup-map curr-index)]
+        (recur (:next cup) (conj visited curr-index) (cons (:val cup) result))))))
 
 (defn main-1
   []
   (let [cups (parse-input day-23-input)
-        result-state (play-turns cups 100)]
-    (println (str/join (wrap-to-1 result-state)))))
+        [cup-map val-map] (play-turns cups 100)]
+    (println (str/join (rest (to-seq cup-map val-map))))))
 
 (defn main-2
   []
   (let [input-cups (parse-input day-23-input)
         cups (into input-cups (range (+ (apply max input-cups) 1) 1000001))
-        result-state (play-turns cups 10000000)]
-    (println (take 3 (wrap-to-1 result-state)))))
+        [cup-map val-map] (play-turns cups 10000000)]
+    (println (apply * (take 2 (rest (to-seq cup-map val-map)))))))
 
 
       
