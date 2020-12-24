@@ -10,5 +10,5 @@
 
 (deftest integration-test-main-2
   (testing "Integration test part 2"
-    (is (= "\n"
+    (is (= "149245887792\n"
            (with-out-str (main-2))))))
