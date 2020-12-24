@@ -23,4 +23,4 @@
 (deftest integration-test-main-2
   (testing "Integration test part 2"
     (is (= "149245887792\n"
-           (with-out-str (main-2))))))
+           (with-out-str (with-minimal-output (main-2)))))))

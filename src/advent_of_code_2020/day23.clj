@@ -36,21 +36,20 @@
         next-cup-1-index (:next this-cup)
         next-cup-2-index (:next (get cup-map next-cup-1-index))
         next-cup-3-index (:next (get cup-map next-cup-2-index))
+        next-cups (vec (map #(get cup-map %) (list next-cup-1-index next-cup-2-index next-cup-3-index)))
         after-removed-index (:next (get cup-map next-cup-3-index))
         dest-cup-val (get-destination-cup
                        (:val this-cup)
-                       (map #(:val
-                               (get cup-map %))
-                            (list next-cup-1-index next-cup-2-index next-cup-3-index))
+                       (map :val next-cups)
                        (count cup-map))
         dest-cup-index (get cup-lookup-map dest-cup-val)
         dest-cup (get cup-map dest-cup-index)
         dest-cup-old-next (:next dest-cup)
-        new-map (assoc
+        new-map (assoc!
                   cup-map
                   curr-index (assoc this-cup :next after-removed-index)
                   dest-cup-index (assoc dest-cup :next next-cup-1-index)
-                  next-cup-3-index (assoc (get cup-map next-cup-3-index) :next dest-cup-old-next)
+                  next-cup-3-index (assoc (get next-cups 2) :next dest-cup-old-next)
                   )]
     (list new-map after-removed-index)))
 
@@ -58,12 +57,12 @@
   [cups n-turns]
   (let [[cup-map cup-lookup-map] (convert-vector-to-maps cups)]
     (loop
-      [cup-map cup-map
+      [cup-map (transient cup-map)
        turns-left n-turns
        curr-index 0]
       (when (zero? (mod turns-left 10000)) (println-info "Turns left" turns-left))
       (if (= turns-left 0)
-        (list cup-map cup-lookup-map)
+        (list (persistent! cup-map) cup-lookup-map)
         (let [[new-map new-index] (move-with-map cup-map cup-lookup-map curr-index)]
           (recur new-map
                  (dec turns-left)
@@ -91,7 +90,4 @@
   (let [input-cups (parse-input day-23-input)
         cups (into input-cups (range (+ (apply max input-cups) 1) 1000001))
         [cup-map val-map] (play-turns cups 10000000)]
-    (println (apply * (take 2 (rest (to-seq cup-map val-map)))))))
-
-
-      
+    (println (apply * (take 3 (to-seq cup-map val-map))))))
